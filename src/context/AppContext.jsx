@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CATEGORIES } from '../data/mockPlaces';
-import { fetchPlaces, addPlace, updatePlace, deletePlace, loginAdmin, logoutAdmin, checkAuthSession } from '../services/firebaseService';
+import { fetchPlaces, addPlace, updatePlace, deletePlace, loginAdmin, logoutAdmin, checkAuthSession, loginWithGoogle } from '../services/firebaseService';
 
 const AppContext = createContext();
 
@@ -16,6 +16,7 @@ export const AppProvider = ({ children }) => {
   const [activeTab, setActiveTab] = useState('home'); // 'home' | 'directory' | 'ai-planner' | 'saved' | 'admin'
   const [adminUser, setAdminUser] = useState(null);
   const [selectedPlaceModal, setSelectedPlaceModal] = useState(null);
+  const [pendingAIPrompt, setPendingAIPrompt] = useState(null);
 
   // Initial Chat Messages for AI Trip Planner
   const [chatMessages, setChatMessages] = useState([
@@ -82,6 +83,12 @@ export const AppProvider = ({ children }) => {
     return res;
   };
 
+  const handleGoogleLogin = async () => {
+    const res = await loginWithGoogle();
+    setAdminUser(res.user);
+    return res;
+  };
+
   const handleAdminLogout = async () => {
     await logoutAdmin();
     setAdminUser(null);
@@ -114,7 +121,9 @@ export const AppProvider = ({ children }) => {
         activeTab,
         setActiveTab,
         adminUser,
+        user: adminUser, // Alias for generic users
         handleAdminLogin,
+        handleGoogleLogin,
         handleAdminLogout,
         handleCreatePlace,
         handleEditPlace,
@@ -122,7 +131,9 @@ export const AppProvider = ({ children }) => {
         chatMessages,
         setChatMessages,
         selectedPlaceModal,
-        setSelectedPlaceModal
+        setSelectedPlaceModal,
+        pendingAIPrompt,
+        setPendingAIPrompt
       }}
     >
       {children}

@@ -1,6 +1,6 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { INITIAL_PLACES } from '../data/mockPlaces';
 
@@ -61,7 +61,15 @@ export const saveStoredPlaces = (places) => {
 export const fetchPlaces = async () => {
   if (db) {
     try {
-      const querySnapshot = await getDocs(collection(db, 'places'));
+      // FITUR ANTI-HANG: Jika Firestore belum diaktifkan di Console, request akan timeout dalam 2.5 detik
+      // lalu otomatis jatuh ke fallback data lokal tanpa membuat aplikasi error (Graceful Degradation).
+      const fetchPromise = getDocs(collection(db, 'places'));
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Firestore connection timeout. Database might not be initialized.")), 2500)
+      );
+
+      const querySnapshot = await Promise.race([fetchPromise, timeoutPromise]);
+      
       if (!querySnapshot.empty) {
         const places = [];
         querySnapshot.forEach((doc) => {
@@ -70,7 +78,7 @@ export const fetchPlaces = async () => {
         return places;
       }
     } catch (err) {
-      console.warn("Firestore fetch error, falling back to local dataset:", err);
+      console.warn("Firestore fetch error or timeout. Falling back to local dataset:", err.message);
     }
   }
   return getStoredPlaces();
@@ -153,6 +161,30 @@ export const loginAdmin = async (email, password) => {
   } else {
     throw new Error('Email atau password admin tidak valid. Gunakan admin@pekalojalan.com / admin123');
   }
+};
+
+// 5b. User Google Login
+export const loginWithGoogle = async () => {
+  if (auth) {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      return { user: result.user, success: true };
+    } catch (err) {
+      console.warn("Google Sign-In failed:", err);
+      throw err;
+    }
+  }
+  
+  // Local Demo Google Login Fallback
+  const demoUser = { 
+    uid: 'demo-google-123', 
+    email: 'wisatawan@gmail.com', 
+    displayName: 'Demo Wisatawan', 
+    photoURL: 'https://www.svgrepo.com/show/475656/google-color.svg' 
+  };
+  localStorage.setItem(AUTH_KEY, JSON.stringify(demoUser));
+  return { user: demoUser, success: true };
 };
 
 // 6. Logout Admin

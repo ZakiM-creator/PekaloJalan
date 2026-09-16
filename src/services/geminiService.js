@@ -70,41 +70,70 @@ ATURAN DAN INSTRUKSI RESPONS:
 };
 
 /**
- * Main Gemini Chat Service function
+ * Main AI Chat Service function integrated with OpenRouter
+ * Menggunakan sistem Model Fallback untuk efisiensi token & mencegah limit
  * @param {Array} history - Array of { role: 'user' | 'model', text: string }
  * @param {string} userMessage - Latest prompt
  * @param {Array} placesDatabase - Live list of places
  */
 export const sendMessageToGemini = async (history, userMessage, placesDatabase) => {
+  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+
   if (apiKey && apiKey.trim().length > 5) {
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
       const systemInstruction = createSystemInstruction(placesDatabase);
       
-      const model = genAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash',
-        systemInstruction
+      // Mengubah format history aplikasi menjadi format standar OpenAI/OpenRouter
+      const messages = [
+        { role: 'system', content: systemInstruction },
+        ...history.map(h => ({
+          role: h.role === 'user' ? 'user' : 'assistant',
+          content: h.text
+        })),
+        { role: 'user', content: userMessage }
+      ];
+
+      // Memanggil OpenRouter Multiplexer
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "HTTP-Referer": window.location?.href || "http://localhost:5173", // Wajib untuk OpenRouter tier gratis
+          "X-Title": "PekaloJalan AI Trip Planner",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          // FITUR FALLBACK: Mengantrekan AI gratisan jika yang pertama kena limit!
+          "models": [
+            "google/gemini-1.5-flash:free", // Prioritas Utama
+            "meta-llama/llama-3-8b-instruct:free", // Cadangan 1 (Jika Gemini limit)
+            "mistralai/mistral-7b-instruct:free" // Cadangan 2 (Jika Llama limit)
+          ],
+          "messages": messages,
+          "temperature": 0.7
+        })
       });
 
-      // Convert history for GenAI SDK
-      const historyFormatted = history.map(h => ({
-        role: h.role === 'user' ? 'user' : 'model',
-        parts: [{ text: h.text }]
-      }));
+      if (!response.ok) {
+        throw new Error(`OpenRouter API Error: ${response.status} ${response.statusText}`);
+      }
 
-      const chat = model.startChat({
-        history: historyFormatted
-      });
-
-      const result = await chat.sendMessage(userMessage);
-      const textOutput = result.response.text();
-      return parseAIResponse(textOutput);
+      const data = await response.json();
+      
+      // OpenRouter mengembalikan data di dalam array choices
+      if (data.choices && data.choices.length > 0) {
+        const textOutput = data.choices[0].message.content;
+        return parseAIResponse(textOutput);
+      } else {
+        throw new Error("No choices returned from OpenRouter");
+      }
     } catch (err) {
-      console.warn("Gemini API call failed or error encountered. Switching to Smart Local AI Engine:", err);
+      console.warn("OpenRouter API call failed / rate limited. Switching to Smart Local AI Engine:", err);
     }
   }
 
-  // Smart Local Fallback AI Engine
+  // Jika API Key tidak ada, atau koneksi terputus, atau limit semua model habis
+  // Aktifkan Smart Local Fallback AI Engine agar website tidak pernah Error!
   return generateLocalAIResponse(history, userMessage, placesDatabase);
 };
 
@@ -172,85 +201,86 @@ Silakan ketik preferensi Anda di bawah!`,
     };
   }
 
+  // Check if a specific place from database is mentioned in the prompt
+  const mentionedPlace = placesDatabase.find(p => 
+    promptLower.includes(p.name.toLowerCase()) || 
+    p.name.toLowerCase().includes(promptLower.replace('tolong masukkan', '').trim())
+  );
+
   // Filter places based on categories matching user prompt
-  const hasReligi = promptLower.includes('religi') || promptLower.includes('masjid') || promptLower.includes('ziarah');
-  const hasBatik = promptLower.includes('batik') || promptLower.includes('museum') || promptLower.includes('oleh');
-  const hasPantai = promptLower.includes('pantai') || promptLower.includes('sunset') || promptLower.includes('alam');
+  const hasReligi = promptLower.includes('religi') || promptLower.includes('masjid') || promptLower.includes('ziarah') || (mentionedPlace && mentionedPlace.category === 'religi');
+  const hasBatik = promptLower.includes('batik') || promptLower.includes('museum') || promptLower.includes('oleh') || (mentionedPlace && (mentionedPlace.category === 'oleh-oleh' || mentionedPlace.category === 'wisata'));
+  const hasPantai = promptLower.includes('pantai') || promptLower.includes('pasir kencana') || promptLower.includes('sunset') || promptLower.includes('alam');
   const hasMurah = promptLower.includes('murah') || promptLower.includes('hemat') || promptLower.includes('backpacker');
 
   const selectedPlaces = [];
 
-  // 1. Morning activity
-  const morningPlace = hasBatik 
-    ? placesDatabase.find(p => p.id === 'place-1') || placesDatabase.find(p => p.category === 'wisata')
-    : (hasReligi ? placesDatabase.find(p => p.id === 'place-15') : placesDatabase.find(p => p.category === 'wisata'));
-  
+  // 1. Morning / Utama
+  let morningPlace = null;
+  if (mentionedPlace) {
+    morningPlace = mentionedPlace;
+  } else if (hasBatik) {
+    morningPlace = placesDatabase.find(p => p.id === 'place-1') || placesDatabase.find(p => p.category === 'wisata');
+  } else if (hasReligi) {
+    morningPlace = placesDatabase.find(p => p.id === 'place-15') || placesDatabase.find(p => p.category === 'religi');
+  } else {
+    morningPlace = placesDatabase.find(p => p.category === 'wisata');
+  }
   if (morningPlace) selectedPlaces.push(morningPlace);
 
   // 2. Lunch / Culinary
-  const lunchPlace = hasMurah
-    ? (placesDatabase.find(p => p.id === 'place-18') || placesDatabase.find(p => p.category === 'street-food'))
-    : (placesDatabase.find(p => p.id === 'place-17') || placesDatabase.find(p => p.category === 'street-food'));
-  
+  const lunchPlace = placesDatabase.find(p => p.id !== morningPlace?.id && (p.category === 'street-food' || p.category === 'resto')) || placesDatabase.find(p => p.category === 'street-food');
   if (lunchPlace) selectedPlaces.push(lunchPlace);
 
   // 3. Afternoon Shopping / Culture
-  const afternoonPlace = placesDatabase.find(p => p.id === 'place-13') || placesDatabase.find(p => p.category === 'oleh-oleh');
+  const afternoonPlace = placesDatabase.find(p => p.id !== morningPlace?.id && p.id !== lunchPlace?.id && (p.category === 'oleh-oleh' || p.category === 'cafe')) || placesDatabase.find(p => p.category === 'oleh-oleh');
   if (afternoonPlace) selectedPlaces.push(afternoonPlace);
 
   // 4. Evening Sunset / Fun
-  const eveningPlace = hasPantai
-    ? (placesDatabase.find(p => p.id === 'place-2') || placesDatabase.find(p => p.category === 'wisata'))
-    : (placesDatabase.find(p => p.id === 'place-11') || placesDatabase.find(p => p.category === 'hiburan'));
+  const eveningPlace = placesDatabase.find(p => p.id !== morningPlace?.id && p.id !== lunchPlace?.id && p.id !== afternoonPlace?.id && (p.category === 'wisata' || p.category === 'hiburan')) || placesDatabase.find(p => p.category === 'hiburan');
   if (eveningPlace) selectedPlaces.push(eveningPlace);
 
   const totalCost = selectedPlaces.reduce((sum, p) => sum + (p.estimatedCost || 15000), 0);
 
+  const targetName = mentionedPlace ? mentionedPlace.name : (morningPlace ? morningPlace.name : "Destinasi Pilihan");
+
   const itineraryData = {
     isItinerary: true,
-    title: `Rencana Jelajah Kota Batik Pekalongan (Custom Trip)`,
+    title: mentionedPlace ? `Rencana Jelajah Pekalongan Termasuk ${mentionedPlace.name}` : `Rencana Jelajah Kota Batik Pekalongan (Custom Trip)`,
     duration: "1 Hari (Fleksibel)",
     estimatedCostPerPerson: totalCost,
-    summary: `Rencana perjalanan komprehensif yang dirangkum khusus sesuai preferensi Anda. Menikmati kekayaan budaya batik, kuliner khas lezat, dan spot ikonik Pekalongan.`,
-    schedule: [
-      {
-        time: "08:30 - 11:00",
-        period: "Pagi",
-        placeName: morningPlace ? morningPlace.name : "Museum Batik Pekalongan",
-        activity: morningPlace ? morningPlace.description.slice(0, 110) + "..." : "Eksplorasi budaya batik khas Pekalongan.",
-        estimatedCost: morningPlace ? morningPlace.estimatedCost : 10000
-      },
-      {
-        time: "11:30 - 13:00",
-        period: "Siang",
-        placeName: lunchPlace ? lunchPlace.name : "Soto Tauto Pak Amir Kraton",
-        activity: lunchPlace ? lunchPlace.description.slice(0, 110) + "..." : "Makan siang kuliner khas lokal.",
-        estimatedCost: lunchPlace ? lunchPlace.estimatedCost : 25000
-      },
-      {
-        time: "13:30 - 16:00",
-        period: "Sore",
-        placeName: afternoonPlace ? afternoonPlace.name : "International Batik Center (IBC)",
-        activity: afternoonPlace ? afternoonPlace.description.slice(0, 110) + "..." : "Berbelanja oleh-oleh khas Pekalongan.",
-        estimatedCost: afternoonPlace ? afternoonPlace.estimatedCost : 100000
-      },
-      {
-        time: "16:30 - 19:30",
-        period: "Malam",
-        placeName: eveningPlace ? eveningPlace.name : "Taman Wisata Pasir Kencana",
-        activity: eveningPlace ? eveningPlace.description.slice(0, 110) + "..." : "Bersantai menikmati suasana malam Pekalongan.",
-        estimatedCost: eveningPlace ? eveningPlace.estimatedCost : 25000
-      }
-    ],
+    summary: mentionedPlace 
+      ? `Rencana perjalanan ini dirancang khusus menyertakan ${mentionedPlace.name} dengan rekomendasi waktu terbaik serta rute kuliner dan belanja batik terdekat.`
+      : `Rencana perjalanan komprehensif yang dirangkum khusus sesuai preferensi Anda. Menikmati kekayaan budaya batik, kuliner khas lezat, dan spot ikonik Pekalongan.`,
+    schedule: selectedPlaces.map((p, idx) => {
+      const periods = [
+        { period: 'Pagi', time: '08:30 - 11:00' },
+        { period: 'Siang', time: '11:30 - 13:30' },
+        { period: 'Sore', time: '14:00 - 16:30' },
+        { period: 'Malam', time: '17:00 - 19:30' }
+      ];
+      const slot = periods[idx] || { period: 'Sesi ' + (idx + 1), time: 'Fleksibel' };
+      return {
+        time: slot.time,
+        period: slot.period,
+        placeName: p.name,
+        activity: p.description.slice(0, 110) + '...',
+        estimatedCost: p.estimatedCost || 15000
+      };
+    }),
     tips: [
-      "Bawa pakaian santai berbahan katun yang nyaman untuk menjelajah.",
-      "Gunakan pembayaran non-tunai atau sediakan tunai untuk jajan kuliner street food.",
-      "Cek jam buka destinasi agar kunjungan berjalan sesuai rencana."
+      mentionedPlace ? `Waktu terbaik mengunjungi ${mentionedPlace.name}: ${mentionedPlace.openingHours || 'pagi atau sore hari'}.` : "Kunjungi tempat lebih awal untuk menghindari keramaian.",
+      "Gunakan transportasi lokal atau kendaraan pribadi untuk berpindah antar-lokasi dengan efisien.",
+      "Sediakan uang tunai secukupnya untuk berbelanja kuliner kaki lima dan suvenir lokal."
     ]
   };
 
+  const responseGreeting = mentionedPlace 
+    ? `Halo Sedulur! Tentu saja, saya sudah memasukkan **${mentionedPlace.name}** ke dalam rencana perjalanan Anda di Pekalongan. Waktu terbaik mengunjunginya adalah saat **${mentionedPlace.openingHours || 'pagi hari'}** agar suasananya nyaman. Saya juga telah memadukan rute ke tempat kuliner dan belanja batik terdekat berikut ini! 👇`
+    : `Halo Sedulur! Berdasarkan preferensi yang Anda sampaikan, saya telah meracik rencana perjalanan spesial jelajah Kota Pekalongan berikut ini. Silakan periksa linimasa di bawah ini! 👇`;
+
   return {
-    text: `Halo Sedulur! Berdasarkan preferensi yang Anda sampaikan, saya telah meracik rencana perjalanan spesial jelajah Kota Pekalongan berikut ini. Silakan periksa linimasa di bawah ini! 👇`,
+    text: responseGreeting,
     itinerary: itineraryData
   };
 };

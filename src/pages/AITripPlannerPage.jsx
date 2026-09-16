@@ -5,7 +5,7 @@ import { ItineraryCard } from '../components/ItineraryCard';
 import { Sparkles, Send, Bot, User, Trash2, RefreshCw, Compass, Lightbulb } from 'lucide-react';
 
 export const AITripPlannerPage = () => {
-  const { chatMessages, setChatMessages, places } = useApp();
+  const { chatMessages, setChatMessages, places, pendingAIPrompt, setPendingAIPrompt } = useApp();
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
@@ -18,6 +18,15 @@ export const AITripPlannerPage = () => {
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages, isTyping]);
+
+  // Handle pending AI prompt coming from PlaceDetailModal or elsewhere
+  useEffect(() => {
+    if (pendingAIPrompt && !isTyping) {
+      const prompt = pendingAIPrompt;
+      setPendingAIPrompt(null);
+      handleSendMessage(prompt);
+    }
+  }, [pendingAIPrompt, isTyping]);
 
   const handleSendMessage = async (customPrompt) => {
     const promptToSend = customPrompt || inputText;
@@ -95,7 +104,7 @@ export const AITripPlannerPage = () => {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       
       {/* Header Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 sm:p-6 rounded-3xl border border-amber-500/30 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 sm:p-6 rounded-3xl border border-amber-500/30 shadow-xl hide-on-print">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold border border-amber-500/20">
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
@@ -113,6 +122,14 @@ export const AITripPlannerPage = () => {
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
+            onClick={() => window.print()}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 transition-all"
+            title="Cetak/Simpan ke PDF"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Cetak PDF</span>
+          </button>
+          <button
             onClick={handleResetChat}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 transition-all"
             title="Reset percakapan"
@@ -124,7 +141,7 @@ export const AITripPlannerPage = () => {
       </div>
 
       {/* Suggestion Prompt Chips */}
-      <div className="space-y-2">
+      <div className="space-y-2 hide-on-print">
         <div className="flex items-center gap-1.5 text-xs text-amber-400 font-bold uppercase tracking-wider">
           <Lightbulb className="w-3.5 h-3.5" />
           <span>Contoh Permintaan Cepat (Klik untuk Mencoba):</span>
@@ -145,10 +162,10 @@ export const AITripPlannerPage = () => {
       </div>
 
       {/* Chat Conversation Box */}
-      <div className="glass-panel rounded-3xl border border-slate-800 overflow-hidden flex flex-col h-[650px] shadow-2xl">
+      <div className="glass-panel rounded-3xl border border-slate-800 overflow-hidden flex flex-col h-[650px] shadow-2xl print-chat-container">
         
         {/* Messages Container */}
-        <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6">
+        <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 print-chat-container">
           {chatMessages.map((msg) => {
             const isUser = msg.role === 'user';
             return (
@@ -167,8 +184,8 @@ export const AITripPlannerPage = () => {
                   <div
                     className={`p-4 sm:p-5 rounded-3xl text-xs sm:text-sm leading-relaxed ${
                       isUser
-                        ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-tr-none shadow-lg shadow-amber-600/15'
-                        : 'bg-slate-900 border border-slate-800 text-slate-100 rounded-tl-none'
+                        ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-tr-none shadow-lg shadow-amber-600/15 print-user-bubble'
+                        : 'bg-slate-900 border border-slate-800 text-slate-100 rounded-tl-none print-ai-bubble'
                     }`}
                   >
                     <p className="whitespace-pre-line font-sans">{msg.text}</p>
@@ -201,7 +218,7 @@ export const AITripPlannerPage = () => {
 
           {/* Typing Indicator */}
           {isTyping && (
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-3 items-center hide-on-print">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-slate-950 font-bold shrink-0">
                 <Bot className="w-5 h-5 text-slate-950" />
               </div>
@@ -222,7 +239,7 @@ export const AITripPlannerPage = () => {
         </div>
 
         {/* Chat Input Bar */}
-        <div className="p-3 sm:p-4 bg-slate-950 border-t border-slate-800">
+        <div className="p-3 sm:p-4 bg-slate-950 border-t border-slate-800 hide-on-print">
           <form
             onSubmit={(e) => {
               e.preventDefault();
