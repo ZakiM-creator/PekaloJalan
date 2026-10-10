@@ -1,10 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
 // System instruction prompt for PekaloJalan AI Trip Planner
 const createSystemInstruction = (placesDatabase) => {
-  const placesFormatted = placesDatabase.map(p => 
+  const placesFormatted = placesDatabase.map(p =>
     `- Nama: ${p.name} | Kategori: ${p.category} | Harga Est: Rp ${p.estimatedCost.toLocaleString('id-ID')} | Alamat: ${p.address} | Rating: ${p.rating} | Jam Buka: ${p.openingHours} | Deskripsi: ${p.description}`
   ).join('\n');
 
@@ -70,20 +68,76 @@ ATURAN DAN INSTRUKSI RESPONS:
 };
 
 /**
- * Main AI Chat Service function integrated with OpenRouter
- * Menggunakan sistem Model Fallback untuk efisiensi token & mencegah limit
- * @param {Array} history - Array of { role: 'user' | 'model', text: string }
- * @param {string} userMessage - Latest prompt
- * @param {Array} placesDatabase - Live list of places
+ * Generate narrative cultural/tourism description for a destination in Pekalongan
+ */
+export const generatePlaceDescription = async (name, category, address) => {
+  const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+  const prompt = `Tuliskan 2 kalimat deskripsi singkat, memikat, dan bernuansa lokal khas Kota Pekalongan ("Kota Batik") untuk destinasi berikut:
+Nama: ${name}
+Kategori: ${category}
+Alamat: ${address || 'Kota Pekalongan, Jawa Tengah'}
+
+Instruksi: Langsung berikan teks deskripsinya saja tanpa tanda petik pembuka/penutup dan tanpa basa-basi.`;
+
+  try {
+    // 1. Prioritize OpenRouter if valid key exists
+    if (openRouterKey && openRouterKey.startsWith('sk-or-')) {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${openRouterKey}`,
+          "HTTP-Referer": window.location?.href || "http://localhost:5173",
+          "X-Title": "PekaloJalan AI Trip Planner",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "model": "google/gemini-2.5-flash",
+          "messages": [{ role: "user", content: prompt }],
+          "temperature": 0.7
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.choices && data.choices[0]?.message?.content) {
+          return data.choices[0].message.content.trim();
+        }
+      } else {
+        console.warn("OpenRouter API Failed:", response.statusText);
+      }
+    }
+    // 2. Fallback to Native Google Gemini API
+    else if (geminiKey && geminiKey.startsWith('AIza')) {
+      const genAI = new GoogleGenerativeAI(geminiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent(prompt);
+      const responseText = result.response.text();
+      if (responseText) {
+        return responseText.trim();
+      }
+    }
+  } catch (err) {
+    console.warn("AI description generation error:", err);
+  }
+
+  // 3. Ultimate Fallback (Local static rule-based)
+  return `${name} merupakan destinasi ${category} populer di Kota Pekalongan yang berlokasi di ${address || 'Kota Pekalongan'}. Tempat yang tepat untuk menikmati pesona khas Kota Batik bersama keluarga dan teman.`;
+};
+
+/**
+ * Main AI Chat Service function
+ * Menggunakan sistem Hybrid (OpenRouter -> Gemini Native -> Local Fallback)
  */
 export const sendMessageToGemini = async (history, userMessage, placesDatabase) => {
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+  const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const systemInstruction = createSystemInstruction(placesDatabase);
 
-  if (apiKey && apiKey.trim().length > 5) {
-    try {
-      const systemInstruction = createSystemInstruction(placesDatabase);
-      
-      // Mengubah format history aplikasi menjadi format standar OpenAI/OpenRouter
+  try {
+    // 1. Try OpenRouter First
+    if (openRouterKey && openRouterKey.startsWith('sk-or-')) {
       const messages = [
         { role: 'system', content: systemInstruction },
         ...history.map(h => ({
@@ -93,46 +147,53 @@ export const sendMessageToGemini = async (history, userMessage, placesDatabase) 
         { role: 'user', content: userMessage }
       ];
 
-      // Memanggil OpenRouter Multiplexer
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "HTTP-Referer": window.location?.href || "http://localhost:5173", // Wajib untuk OpenRouter tier gratis
+          "Authorization": `Bearer ${openRouterKey}`,
+          "HTTP-Referer": window.location?.href || "http://localhost:5173",
           "X-Title": "PekaloJalan AI Trip Planner",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          // FITUR FALLBACK: Mengantrekan AI gratisan jika yang pertama kena limit!
-          "models": [
-            "google/gemini-1.5-flash:free", // Prioritas Utama
-            "meta-llama/llama-3-8b-instruct:free", // Cadangan 1 (Jika Gemini limit)
-            "mistralai/mistral-7b-instruct:free" // Cadangan 2 (Jika Llama limit)
-          ],
+          "model": "google/gemini-2.5-flash",
           "messages": messages,
           "temperature": 0.7
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`OpenRouter API Error: ${response.status} ${response.statusText}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.choices && data.choices[0]?.message?.content) {
+          return parseAIResponse(data.choices[0].message.content);
+        }
       }
-
-      const data = await response.json();
-      
-      // OpenRouter mengembalikan data di dalam array choices
-      if (data.choices && data.choices.length > 0) {
-        const textOutput = data.choices[0].message.content;
-        return parseAIResponse(textOutput);
-      } else {
-        throw new Error("No choices returned from OpenRouter");
-      }
-    } catch (err) {
-      console.warn("OpenRouter API call failed / rate limited. Switching to Smart Local AI Engine:", err);
+      throw new Error(`OpenRouter API Failed: ${response.status}`);
     }
+    // 2. Try Native Gemini API Second
+    else if (geminiKey && geminiKey.startsWith('AIza')) {
+      const genAI = new GoogleGenerativeAI(geminiKey);
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        systemInstruction: systemInstruction
+      });
+
+      const chat = model.startChat({
+        history: history.map(h => ({
+          role: h.role === 'user' ? 'user' : 'model',
+          parts: [{ text: h.text }]
+        }))
+      });
+
+      const result = await chat.sendMessage([{ text: userMessage }]);
+      const responseText = result.response.text();
+      return parseAIResponse(responseText);
+    }
+  } catch (err) {
+    console.warn("API call failed. Switching to Smart Local AI Engine:", err);
   }
 
-  // Jika API Key tidak ada, atau koneksi terputus, atau limit semua model habis
+  // 3. Jika API Key tidak ada, atau koneksi terputus, atau limit semua model habis
   // Aktifkan Smart Local Fallback AI Engine agar website tidak pernah Error!
   return generateLocalAIResponse(history, userMessage, placesDatabase);
 };
