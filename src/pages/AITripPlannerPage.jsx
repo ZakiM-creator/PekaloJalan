@@ -201,7 +201,7 @@ export const AITripPlannerPage = () => {
                       />
                     )}
 
-                    <span className="block text-[10px] opacity-70 text-right mt-2">
+                    <span className="block text-xs opacity-70 text-right mt-2">
                       {msg.timestamp}
                     </span>
                   </div>

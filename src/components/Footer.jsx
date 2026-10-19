@@ -22,7 +22,7 @@ export const Footer = () => {
             <p className="text-slate-400 text-xs leading-relaxed max-w-md">
               Portal Rekomendasi Wisata terkurasi & Asisten AI Trip Planner otomatis pertama di Kota Pekalongan. Memudahkan wisatawan dan warga lokal merencanakan perjalanan wisata budaya, religi, dan kuliner khas Pekalongan.
             </p>
-            <div className="pt-1 text-[11px] text-amber-400/90 font-medium">
+            <div className="pt-1 text-xs text-amber-400/90 font-medium">
               🏆 Dikembangkan untuk Lomba Teknologi Piranti Lunak — Jambore Pemuda Kota Pekalongan 2026.
             </div>
           </div>
@@ -75,7 +75,7 @@ export const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
+        <div className="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <p>© 2026 PekaloJalan. Seluruh Hak Cipta Dilindungi.</p>
           <div className="flex items-center gap-1">
             <span>Dibuat dengan bangga untuk Kota Pekalongan</span>

@@ -86,7 +86,7 @@ export const HeroBanner = () => {
               </div>
               <div>
                 <p className="text-lg font-bold text-white font-serif">{places.length}+</p>
-                <p className="text-[11px] text-slate-400">Destinasi Terkurasi</p>
+                <p className="text-xs text-slate-400">Destinasi Terkurasi</p>
               </div>
             </div>
 
@@ -96,7 +96,7 @@ export const HeroBanner = () => {
               </div>
               <div>
                 <p className="text-lg font-bold text-white font-serif">Gemini AI</p>
-                <p className="text-[11px] text-slate-400">Conversational Planner</p>
+                <p className="text-xs text-slate-400">Conversational Planner</p>
               </div>
             </div>
 
@@ -106,7 +106,7 @@ export const HeroBanner = () => {
               </div>
               <div>
                 <p className="text-lg font-bold text-white font-serif">8 Kategori</p>
-                <p className="text-[11px] text-slate-400">Lengkap Khas Pekalongan</p>
+                <p className="text-xs text-slate-400">Lengkap Khas Pekalongan</p>
               </div>
             </div>
           </div>

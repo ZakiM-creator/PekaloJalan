@@ -16,7 +16,7 @@ export const ItineraryCard = ({ itinerary, onReviseClick }) => {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-400" />
-            <span className="text-[11px] uppercase font-bold tracking-wider text-amber-400">
+            <span className="text-xs uppercase font-bold tracking-wider text-amber-400">
               Hasil AI Trip Planner Pekalongan
             </span>
           </div>
@@ -64,7 +64,7 @@ export const ItineraryCard = ({ itinerary, onReviseClick }) => {
                   </div>
 
                   {item.estimatedCost > 0 && (
-                    <span className="text-[11px] font-semibold text-emerald-400">
+                    <span className="text-xs font-semibold text-emerald-400">
                       ~ Rp {Number(item.estimatedCost).toLocaleString('id-ID')}
                     </span>
                   )}
@@ -91,7 +91,7 @@ export const ItineraryCard = ({ itinerary, onReviseClick }) => {
             <Lightbulb className="w-3.5 h-3.5" />
             <span>Tips Kunjungan dari AI:</span>
           </div>
-          <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px]">
+          <ul className="list-disc list-inside space-y-1 text-slate-300 text-xs">
             {itinerary.tips.map((tip, idx) => (
               <li key={idx}>{tip}</li>
             ))}
