@@ -2,12 +2,47 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CategoryChips } from '../components/CategoryChips';
 import { PlaceCard } from '../components/PlaceCard';
-import { Search, LayoutGrid, ListFilter, SlidersHorizontal, Compass, X } from 'lucide-react';
+import { Search, LayoutGrid, ListFilter, SlidersHorizontal, Compass, X, MapPin, Navigation } from 'lucide-react';
+import { getKecamatan, getKelurahan, getCoords, haversineKm } from '../utils/geo.js';
 
 export const DirectoryPage = () => {
   const { filteredPlaces, searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, categories } = useApp();
   const [sortBy, setSortBy] = useState('rating'); // 'rating' | 'name' | 'price-asc' | 'price-desc'
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [kecamatan, setKecamatan] = useState('');
+  const [kelurahan, setKelurahan] = useState('');
+  const [posisi, setPosisi] = useState(null); // { lat, lng } posisi pengguna
+  const [statusPosisi, setStatusPosisi] = useState(''); // '' | 'mencari' | 'ditolak' | 'tidak-didukung'
+
+  // Daftar kecamatan dan kelurahan diambil dari data yang ada
+  const daftarKecamatan = [...new Set(filteredPlaces.map(getKecamatan).filter(Boolean))].sort();
+  const daftarKelurahan = [...new Set(
+    filteredPlaces.filter((p) => !kecamatan || getKecamatan(p) === kecamatan).map(getKelurahan).filter(Boolean)
+  )].sort();
+
+  const tempatTerfilter = filteredPlaces.filter((p) =>
+    (!kecamatan || getKecamatan(p) === kecamatan) && (!kelurahan || getKelurahan(p) === kelurahan)
+  );
+
+  const jarakKe = (p) => {
+    const c = getCoords(p);
+    return posisi && c ? haversineKm(posisi, c) : null;
+  };
+
+  const mintaPosisi = () => {
+    if (!navigator.geolocation) { setStatusPosisi('tidak-didukung'); return; }
+    setStatusPosisi('mencari');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setPosisi({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setStatusPosisi(''); },
+      () => { setStatusPosisi('ditolak'); setSortBy('rating'); },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const gantiUrutan = (nilai) => {
+    setSortBy(nilai);
+    if (nilai === 'nearest' && !posisi) mintaPosisi();
+  };
 
   // Sort logic
   // Harga 0 dengan hargaTersedia === false berarti "belum diketahui", bukan gratis.
@@ -15,7 +50,15 @@ export const DirectoryPage = () => {
   const hargaTidakDiketahui = (p) => p.hargaTersedia === false;
   const byName = (a, b) => a.name.localeCompare(b.name);
 
-  const sortedPlaces = [...filteredPlaces].sort((a, b) => {
+  const sortedPlaces = [...tempatTerfilter].sort((a, b) => {
+    if (sortBy === 'nearest') {
+      const ja = jarakKe(a);
+      const jb = jarakKe(b);
+      if (ja == null && jb == null) return byName(a, b);
+      if (ja == null) return 1; // tanpa koordinat selalu di bawah
+      if (jb == null) return -1;
+      return (ja - jb) || byName(a, b);
+    }
     if (sortBy === 'name') return byName(a, b);
     if (sortBy === 'rating') return ((b.rating || 0) - (a.rating || 0)) || byName(a, b);
     if (sortBy === 'price-asc' || sortBy === 'price-desc') {
@@ -77,6 +120,55 @@ export const DirectoryPage = () => {
         {/* 8 Categories Chips */}
         <CategoryChips />
 
+        {/* Filter Kecamatan & Kelurahan */}
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+            <MapPin className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-slate-400">Kecamatan:</span>
+            <select
+              value={kecamatan}
+              onChange={(e) => { setKecamatan(e.target.value); setKelurahan(''); }}
+              className="bg-transparent text-amber-300 font-semibold focus:outline-none cursor-pointer"
+            >
+              <option value="" className="bg-slate-900 text-white">Semua</option>
+              {daftarKecamatan.map((k) => (
+                <option key={k} value={k} className="bg-slate-900 text-white">{k}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+            <MapPin className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-slate-400">Kelurahan:</span>
+            <select
+              value={kelurahan}
+              onChange={(e) => setKelurahan(e.target.value)}
+              className="bg-transparent text-amber-300 font-semibold focus:outline-none cursor-pointer"
+            >
+              <option value="" className="bg-slate-900 text-white">Semua</option>
+              {daftarKelurahan.map((k) => (
+                <option key={k} value={k} className="bg-slate-900 text-white">{k}</option>
+              ))}
+            </select>
+          </div>
+          {(kecamatan || kelurahan) && (
+            <button
+              onClick={() => { setKecamatan(''); setKelurahan(''); }}
+              className="px-3 py-1.5 rounded-xl text-slate-400 hover:text-white border border-slate-800"
+            >
+              Hapus filter wilayah
+            </button>
+          )}
+          {sortBy === 'nearest' && statusPosisi === 'mencari' && (
+            <span className="flex items-center gap-1.5 text-slate-400"><Navigation className="w-3.5 h-3.5 text-amber-400" />Mencari lokasi Anda...</span>
+          )}
+          {statusPosisi === 'ditolak' && (
+            <span className="text-red-300">Lokasi tidak bisa diakses. Izinkan akses lokasi di browser lalu pilih lagi.</span>
+          )}
+          {statusPosisi === 'tidak-didukung' && (
+            <span className="text-red-300">Browser ini tidak mendukung lokasi.</span>
+          )}
+        </div>
+
         {/* Sort & View Mode Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800 text-xs">
           
@@ -91,13 +183,14 @@ export const DirectoryPage = () => {
               <span className="text-slate-400">Urutkan:</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => gantiUrutan(e.target.value)}
                 className="bg-transparent text-amber-300 font-semibold focus:outline-none cursor-pointer"
               >
                 <option value="rating" className="bg-slate-900 text-white">Rating Tertinggi</option>
                 <option value="name" className="bg-slate-900 text-white">Nama (A-Z)</option>
                 <option value="price-asc" className="bg-slate-900 text-white">Biaya Terendah</option>
                 <option value="price-desc" className="bg-slate-900 text-white">Biaya Tertinggi</option>
+                <option value="nearest" className="bg-slate-900 text-white">Terdekat dari Saya</option>
               </select>
             </div>
 
@@ -132,7 +225,7 @@ export const DirectoryPage = () => {
       {sortedPlaces.length > 0 ? (
         <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
           {sortedPlaces.map((place) => (
-            <PlaceCard key={place.id} place={place} />
+            <PlaceCard key={place.id} place={place} jarakKm={sortBy === 'nearest' ? jarakKe(place) : null} />
           ))}
         </div>
       ) : (
@@ -148,6 +241,8 @@ export const DirectoryPage = () => {
             onClick={() => {
               setSearchQuery('');
               setSelectedCategory('all');
+              setKecamatan('');
+              setKelurahan('');
             }}
             className="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition-all"
           >

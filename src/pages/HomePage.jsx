@@ -1,6 +1,5 @@
 import React from 'react';
 import { HeroBanner } from '../components/HeroBanner';
-import { CategoryChips } from '../components/CategoryChips';
 import { PlaceCard } from '../components/PlaceCard';
 import { useApp } from '../context/AppContext';
 import { Sparkles, Compass, Flame, ArrowRight, CheckCircle2 } from 'lucide-react';
@@ -19,24 +18,7 @@ export const HomePage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
-        {/* 2. Category Selector */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl sm:text-2xl font-bold font-serif text-white">
-              Jelajahi 8 Kategori Tempat
-            </h2>
-            <button
-              onClick={() => setActiveTab('directory')}
-              className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1"
-            >
-              <span>Lihat Semua</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <CategoryChips />
-        </section>
-
-        {/* 3. Featured Places Section */}
+        {/* 2. Featured Places Section */}
         <section className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-800 pb-4">
             <div>
@@ -59,7 +41,7 @@ export const HomePage = () => {
           </div>
         </section>
 
-        {/* 4. AI Trip Planner Feature Spotlight Banner */}
+        {/* 3. AI Trip Planner Feature Spotlight Banner */}
         <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 border border-amber-500/30 p-6 sm:p-10 shadow-2xl">
           <div className="absolute -right-12 -top-12 w-64 h-64 bg-amber-500/10 blur-3xl rounded-full pointer-events-none" />
           
@@ -128,7 +110,7 @@ export const HomePage = () => {
           </div>
         </section>
 
-        {/* 5. Highlight Kuliner Kaki Lima Pekalongan */}
+        {/* 4. Highlight Kuliner Kaki Lima Pekalongan */}
         <section className="space-y-6">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div>

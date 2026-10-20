@@ -2,13 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { sendMessageToGemini } from '../services/geminiService';
 import { ItineraryCard } from '../components/ItineraryCard';
-import { Sparkles, Send, Bot, User, Trash2, RefreshCw, Compass, Lightbulb } from 'lucide-react';
+import { TripPlanModal } from '../components/TripPlanModal';
+import { Sparkles, Send, Bot, User, Trash2, RefreshCw, Compass, Lightbulb, FileDown } from 'lucide-react';
 
 export const AITripPlannerPage = () => {
   const { chatMessages, setChatMessages, places, pendingAIPrompt, setPendingAIPrompt } = useApp();
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [tripPlanOpen, setTripPlanOpen] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Perintah cetak/unduh ditangani langsung oleh program (tanpa model AI), karena isinya harus pasti dari data
+  const MAU_CETAK = /\b(pdf|cetak|unduh|download|ekspor|export|laporan)\b/i;
 
   // Auto-scroll to bottom of chat
   const scrollToBottom = () => {
@@ -38,6 +43,24 @@ export const AITripPlannerPage = () => {
       text: promptToSend.trim(),
       timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
     };
+
+    if (MAU_CETAK.test(promptToSend)) {
+      const jam = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      setChatMessages(prev => [
+        ...prev,
+        userMessageObj,
+        {
+          id: `ai-pdf-${Date.now()}`,
+          role: 'model',
+          text: 'Baik, silakan pilih tempat tujuan final dari hasil diskusi kita, lalu lengkapi data perjalanan. PDF Trip Plan dibuat dari data database dan isian Anda, jadi tidak ada isi karangan AI.',
+          tripPlanCta: true,
+          timestamp: jam
+        }
+      ]);
+      setInputText('');
+      setTripPlanOpen(true);
+      return;
+    }
 
     // Add user message to state immediately
     const updatedMessages = [...chatMessages, userMessageObj];
@@ -122,12 +145,12 @@ export const AITripPlannerPage = () => {
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
-            onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 transition-all"
-            title="Cetak/Simpan ke PDF"
+            onClick={() => setTripPlanOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold border border-amber-500/30 transition-all"
+            title="Buat laporan Trip Plan dalam format PDF"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-            <span>Cetak PDF</span>
+            <span>Trip Plan PDF</span>
           </button>
           <button
             onClick={handleResetChat}
@@ -190,10 +213,21 @@ export const AITripPlannerPage = () => {
                   >
                     <p className="whitespace-pre-line font-sans">{msg.text}</p>
                     
+                    {msg.tripPlanCta && (
+                      <button
+                        onClick={() => setTripPlanOpen(true)}
+                        className="mt-3 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400"
+                      >
+                        <FileDown className="w-3.5 h-3.5" />
+                        <span>Buka form Trip Plan PDF</span>
+                      </button>
+                    )}
+
                     {/* Render Structured Itinerary Card if present */}
                     {msg.itinerary && (
                       <ItineraryCard 
                         itinerary={msg.itinerary} 
+                        onTripPlan={() => setTripPlanOpen(true)}
                         onReviseClick={() => {
                           const revisePrompt = "Tolong revisi itinerary di atas, ganti salah satu tempat dengan tempat kuliner/wisata yang lebih hemat atau berbeda.";
                           handleSendMessage(revisePrompt);
@@ -268,6 +302,8 @@ export const AITripPlannerPage = () => {
         </div>
 
       </div>
+
+      <TripPlanModal open={tripPlanOpen} onClose={() => setTripPlanOpen(false)} chatMessages={chatMessages} />
 
     </div>
   );

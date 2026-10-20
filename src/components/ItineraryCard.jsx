@@ -1,7 +1,8 @@
 import React from 'react';
-import { Calendar, Clock, DollarSign, MapPin, CheckCircle, Share2, Printer, Sparkles, Lightbulb } from 'lucide-react';
+import { Calendar, Clock, DollarSign, MapPin, CheckCircle, Share2, Printer, Sparkles, Lightbulb, ExternalLink, Navigation } from 'lucide-react';
+import { formatKm } from '../utils/geo.js';
 
-export const ItineraryCard = ({ itinerary, onReviseClick }) => {
+export const ItineraryCard = ({ itinerary, onReviseClick, onTripPlan }) => {
   if (!itinerary) return null;
 
   const handlePrint = () => {
@@ -38,6 +39,17 @@ export const ItineraryCard = ({ itinerary, onReviseClick }) => {
         <p className="text-xs sm:text-sm text-slate-300 bg-amber-500/5 p-3 rounded-xl border border-amber-500/10 leading-relaxed italic">
           "{itinerary.summary}"
         </p>
+      )}
+
+      {/* Ringkasan rute (hanya ada jika itinerary sudah dicocokkan dengan database) */}
+      {typeof itinerary.totalJarakKm === 'number' && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300">
+          <span className="flex items-center gap-1.5">
+            <Navigation className="w-3.5 h-3.5 text-amber-400" />
+            Total rute sekitar {formatKm(itinerary.totalJarakKm)} (garis lurus)
+          </span>
+          {itinerary.jumlahKecamatan > 0 && <span>Melewati {itinerary.jumlahKecamatan} kecamatan</span>}
+        </div>
       )}
 
       {/* Timeline Schedule */}
@@ -78,11 +90,37 @@ export const ItineraryCard = ({ itinerary, onReviseClick }) => {
                 <p className="text-xs text-slate-300 leading-normal">
                   {item.activity}
                 </p>
+
+                {(item.kecamatan || item.jarakDariSebelumnya != null || item.mapUrl) && (
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] text-slate-400">
+                    {item.kecamatan && <span>Kec. {item.kecamatan.replace(/^Pekalongan /, '')}</span>}
+                    {item.jarakDariSebelumnya != null && (
+                      <span>{formatKm(item.jarakDariSebelumnya)} dari tempat sebelumnya</span>
+                    )}
+                    {item.mapUrl && (
+                      <a
+                        href={item.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-bold text-amber-400 hover:text-amber-300 underline underline-offset-4"
+                      >
+                        <span>Buka di Google Maps</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {itinerary.tempatDibuang && itinerary.tempatDibuang.length > 0 && (
+        <p className="text-[11px] text-slate-500">
+          {itinerary.tempatDibuang.length} saran AI tidak ditampilkan karena tidak ada di database PekaloJalan.
+        </p>
+      )}
 
       {/* Tips */}
       {itinerary.tips && itinerary.tips.length > 0 && (
@@ -102,11 +140,11 @@ export const ItineraryCard = ({ itinerary, onReviseClick }) => {
       {/* Card Action Buttons */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
         <button
-          onClick={handlePrint}
+          onClick={onTripPlan || handlePrint}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all"
         >
           <Printer className="w-3.5 h-3.5 text-amber-400" />
-          <span>Cetak / Simpan PDF</span>
+          <span>{onTripPlan ? 'Buat Trip Plan PDF' : 'Cetak / Simpan PDF'}</span>
         </button>
 
         {onReviseClick && (
