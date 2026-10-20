@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { groundItinerary } from '../utils/itinerary.js';
 
 // ---------------------------------------------------------------------------
 // Pemilihan tempat untuk AI
@@ -156,7 +157,7 @@ ATURAN DAN INSTRUKSI RESPONS:
 }
 \`\`\`
 
-4. Pastikan tempat yang kamu rekomendasikan mengutamakan data tempat yang ada di database di atas.
+4. Rekomendasikan HANYA tempat yang ada di daftar di atas. Pada blok JSON, isi placeName persis sama dengan kolom Nama di daftar. Tempat di luar daftar akan dibuang oleh sistem. Susun tempat yang berdekatan (kecamatan sama) pada hari yang sama agar perjalanan tidak bolak-balik.
 5. Jika pengguna meminta revisi (misal "ganti resto B dengan yang murah"), perbarui jadwalnya dan sertakan kembali blok JSON terbarunya.
 6. Jangan mengarang harga, jam buka, rating, atau fasilitas. Jika data tertulis "harga belum diketahui", "belum ada", atau "belum tersedia", sampaikan apa adanya. "Harga belum diketahui" BUKAN berarti gratis.
 7. Pada blok JSON, isi estimatedCost dengan 0 untuk tempat yang harganya belum diketahui. estimatedCostPerPerson hanya menjumlahkan harga yang diketahui, dan jelaskan di summary atau tips bahwa ada tempat yang harganya belum diketahui.
@@ -228,6 +229,14 @@ Instruksi: Langsung berikan teks deskripsinya saja tanpa tanda petik pembuka/pen
  * Menggunakan sistem Hybrid (OpenRouter -> Gemini Native -> Local Fallback)
  */
 export const sendMessageToGemini = async (history, userMessage, placesDatabase) => {
+  const hasil = await kirimKeModel(history, userMessage, placesDatabase);
+  if (!hasil || !hasil.itinerary) return hasil;
+  // Pagar kode: hanya tempat yang ada di database yang boleh tampil, urutan rute dirapikan
+  const itinerary = groundItinerary(hasil.itinerary, placesDatabase);
+  return { ...hasil, itinerary };
+};
+
+const kirimKeModel = async (history, userMessage, placesDatabase) => {
   const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
   const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
   const tempatRelevan = pilihTempatRelevan(placesDatabase, history, userMessage);

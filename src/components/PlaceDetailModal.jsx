@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Star, MapPin, Clock, Tag, ExternalLink, Bookmark, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { getMapUrl, getDirectionsUrl } from '../utils/geo.js';
 
 export const PlaceDetailModal = () => {
   const { selectedPlaceModal, setSelectedPlaceModal, bookmarks, toggleBookmark, setActiveTab, setPendingAIPrompt } = useApp();
@@ -116,7 +117,7 @@ export const PlaceDetailModal = () => {
               <div className="flex-1">
                 <p>{place.address}</p>
                 <a
-                  href={place.locationMapUrl}
+                  href={getMapUrl(place)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-amber-400 hover:text-amber-300 underline underline-offset-4"
@@ -173,7 +174,7 @@ export const PlaceDetailModal = () => {
           </button>
 
           <a
-            href={place.locationMapUrl}
+            href={getDirectionsUrl(place)}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700"

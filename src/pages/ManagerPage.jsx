@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { PlaceFormModal } from '../components/PlaceFormModal';
 import { PlacesNotice } from '../components/PlacesNotice';
 import { Plus, Edit, Star, MapPin } from 'lucide-react';
+import { hitungKelengkapan, ringkasKelengkapan, BIDANG } from '../utils/kelengkapan.js';
 
 export const ManagerPage = () => {
   const { user, myPlaces, categories, dataReady, handleCreatePlace, handleEditPlace } = useApp();
@@ -19,6 +20,8 @@ export const ManagerPage = () => {
     setEditingPlace(place);
     setIsModalOpen(true);
   };
+
+  const ringkasan = ringkasKelengkapan(myPlaces);
 
   const submitPlace = async (payload) => {
     if (editingPlace) {
@@ -57,6 +60,28 @@ export const ManagerPage = () => {
 
       <PlacesNotice />
 
+      {myPlaces.length > 0 && (
+        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-sm font-bold text-white">Kelengkapan Profil Tempat Anda</h2>
+            <span className="text-lg font-extrabold text-amber-400">{ringkasan.rataRata}%</span>
+          </div>
+          <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-amber-500 to-orange-600" style={{ width: `${ringkasan.rataRata}%` }} />
+          </div>
+          <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-300">
+            {BIDANG.map((b) => (
+              <span key={b.kunci}>
+                {b.label} kosong: <span className="font-bold text-amber-300">{ringkasan.kosongPerBidang[b.kunci]}</span> dari {ringkasan.total} tempat
+              </span>
+            ))}
+          </div>
+          <p className="text-xs text-slate-400">
+            Tempat dengan foto, deskripsi, dan jam buka yang lengkap lebih mudah dipilih pengunjung dan AI Trip Planner.
+          </p>
+        </div>
+      )}
+
       {myPlaces.length === 0 ? (
         <div className="glass-panel rounded-3xl border border-slate-800 p-10 text-center space-y-2">
           <MapPin className="w-8 h-8 text-amber-400 mx-auto" />
@@ -69,6 +94,7 @@ export const ManagerPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {myPlaces.map((place) => {
             const categoryObj = categories.find((c) => c.id === place.category);
+            const kelengkapan = hitungKelengkapan(place);
             return (
               <div key={place.id} className="glass-card rounded-2xl border border-slate-800 overflow-hidden flex flex-col">
                 <img src={place.image} alt={place.name} className="h-36 w-full object-cover" />
@@ -84,6 +110,18 @@ export const ManagerPage = () => {
                     {categoryObj ? categoryObj.name : place.category}
                   </span>
                   <p className="text-xs text-slate-400 line-clamp-2">{place.address}</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400">Kelengkapan profil</span>
+                      <span className={`font-bold ${kelengkapan.persen === 100 ? 'text-emerald-400' : 'text-amber-300'}`}>{kelengkapan.persen}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                      <div className={`h-full ${kelengkapan.persen === 100 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${kelengkapan.persen}%` }} />
+                    </div>
+                    {kelengkapan.kosong.length > 0 && (
+                      <p className="text-[11px] text-slate-400">Belum diisi: {kelengkapan.kosong.join(', ')}</p>
+                    )}
+                  </div>
                   <div className="mt-auto pt-2">
                     <button
                       onClick={() => openEdit(place)}
