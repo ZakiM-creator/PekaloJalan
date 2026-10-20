@@ -1,0 +1,65 @@
+rules_version = '2';
+
+// Aturan keamanan PekaloJalan.
+// Cara pakai: salin seluruh isi file ini ke Firebase Console,
+// menu Firestore Database, tab Rules, lalu klik Publish.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // WAJIB DIISI: email admin (huruf kecil semua).
+    // Harus sama dengan VITE_ADMIN_EMAILS di file .env.
+    function adminEmails() {
+      return ['musyaffazaki31@gmail.com'];
+    }
+
+    function signedIn() {
+      return request.auth != null
+        && request.auth.token.email_verified == true;
+    }
+
+    function myEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    function isAdmin() {
+      return signedIn() && myEmail() in adminEmails();
+    }
+
+    function isManager() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/roles/$(myEmail()))
+        && get(/databases/$(database)/documents/roles/$(myEmail())).data.role == 'manager';
+    }
+
+    // Data tempat wisata
+    match /places/{placeId} {
+      // Semua akun yang sudah login boleh membaca
+      allow read: if signedIn();
+
+      // Admin bebas. Pengelola hanya boleh membuat tempat atas namanya
+      // dan tidak boleh menandai "Destinasi Populer".
+      allow create: if isAdmin()
+        || (isManager()
+            && request.resource.data.get('managerEmail', '') == myEmail()
+            && request.resource.data.get('featured', false) == false);
+
+      // Pengelola hanya boleh mengubah tempat miliknya,
+      // tanpa mengganti pemilik dan tanpa mengubah status "Destinasi Populer".
+      allow update: if isAdmin()
+        || (isManager()
+            && resource.data.get('managerEmail', '') == myEmail()
+            && request.resource.data.get('managerEmail', '') == resource.data.get('managerEmail', '')
+            && request.resource.data.get('featured', false) == resource.data.get('featured', false));
+
+      // Hanya admin yang boleh menghapus
+      allow delete: if isAdmin();
+    }
+
+    // Daftar pengelola wisata (id dokumen = email huruf kecil)
+    match /roles/{roleEmail} {
+      allow read: if isAdmin() || (signedIn() && roleEmail == myEmail());
+      allow write: if isAdmin();
+    }
+  }
+}

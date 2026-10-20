@@ -1,18 +1,36 @@
 import React, { useState } from 'react';
-import { Compass, Sparkles, MapPin, Bookmark, User, Menu, X, ShieldCheck } from 'lucide-react';
+import { Compass, Sparkles, MapPin, Bookmark, Menu, X, ShieldCheck, Store, LogOut } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { ROLE_LABELS, canAccessTab } from '../config/roles';
+
+const ALL_NAV_ITEMS = [
+  { id: 'home', label: 'Beranda', icon: MapPin },
+  { id: 'directory', label: 'Direktori Tempat', icon: Compass },
+  { id: 'ai-planner', label: 'AI Trip Planner', icon: Sparkles, badge: 'AI Cerdas' },
+  { id: 'saved', label: 'Tersimpan', icon: Bookmark },
+  { id: 'manager', label: 'Kelola Tempat Saya', icon: Store },
+  { id: 'admin', label: 'Panel Admin', icon: ShieldCheck }
+];
+
+const Avatar = ({ user, className }) => (
+  <img
+    src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email || 'Pengguna')}`}
+    alt="Foto profil"
+    referrerPolicy="no-referrer"
+    className={className}
+  />
+);
 
 export const Navbar = () => {
-  const { activeTab, setActiveTab, bookmarks, adminUser, user, handleGoogleLogin, handleAdminLogout } = useApp();
+  const { activeTab, setActiveTab, bookmarks, user, role, handleLogout } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    { id: 'home', label: 'Beranda', icon: MapPin },
-    { id: 'directory', label: 'Direktori Tempat', icon: Compass },
-    { id: 'ai-planner', label: 'AI Trip Planner', icon: Sparkles, badge: 'AI Cerdas' },
-    { id: 'saved', label: 'Tersimpan', icon: Bookmark, count: bookmarks.length },
-    { id: 'admin', label: adminUser ? 'Panel Admin' : 'Login Admin', icon: User, isShield: Boolean(adminUser) }
-  ];
+  const navItems = ALL_NAV_ITEMS
+    .filter((item) => canAccessTab(role, item.id))
+    .map((item) => (item.id === 'saved' ? { ...item, count: bookmarks.length } : item));
+
+  const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Pengguna');
+  const roleLabel = ROLE_LABELS[role] || '';
 
   const handleNavClick = (tabId) => {
     setActiveTab(tabId);
@@ -20,13 +38,18 @@ export const Navbar = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const onLogout = async () => {
+    setMobileMenuOpen(false);
+    await handleLogout();
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          
+
           {/* Logo Brand */}
-          <div 
+          <div
             onClick={() => handleNavClick('home')}
             className="flex items-center gap-3 cursor-pointer group"
           >
@@ -79,77 +102,50 @@ export const Navbar = () => {
                       {item.count}
                     </span>
                   )}
-
-                  {item.isShield && (
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  )}
                 </button>
               );
             })}
           </nav>
 
-            {/* User Profile / Login Google (Desktop) */}
-            <div className="hidden md:flex items-center ml-2">
-              {user ? (
-                <div className="flex items-center gap-3 bg-slate-900/60 pl-2 pr-4 py-1.5 rounded-full border border-slate-800">
-                  <img 
-                    src={user.photoURL || "https://ui-avatars.com/api/?name=" + (user.displayName || "Admin")} 
-                    alt="Profile" 
-                    className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700"
-                  />
-                  <span className="text-xs font-bold text-slate-200 hidden lg:block">
-                    {user.displayName || user.email.split('@')[0]}
-                  </span>
-                  <button 
-                    onClick={handleAdminLogout} 
-                    className="ml-2 text-slate-400 hover:text-red-400 transition-colors"
-                    title="Keluar (Logout)"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={handleGoogleLogin}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-slate-900 text-xs font-bold hover:bg-slate-200 transition-colors border border-slate-300"
-                >
-                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-4 h-4" />
-                  <span>Login</span>
-                </button>
-              )}
-            </div>
-
-            {/* CTA Mobile Toggle Button */}
-            <div className="flex items-center gap-2 md:hidden">
-              {!user && (
-                <button onClick={handleGoogleLogin} className="p-1.5 rounded-full bg-white flex items-center justify-center">
-                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Login" className="w-5 h-5" />
-                </button>
-              )}
-              {user && (
-                 <img 
-                 src={user.photoURL || "https://ui-avatars.com/api/?name=" + (user.displayName || "Admin")} 
-                 alt="Profile" 
-                 onClick={handleAdminLogout}
-                 className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 cursor-pointer"
-               />
-              )}
-              
+          {/* Profil dan Logout (Desktop) */}
+          <div className="hidden md:flex items-center ml-2">
+            <div className="flex items-center gap-3 bg-slate-900/60 pl-2 pr-4 py-1.5 rounded-full border border-slate-800">
+              <Avatar user={user} className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700" />
+              <div className="hidden lg:block leading-tight">
+                <p className="text-xs font-bold text-slate-200">{displayName}</p>
+                <p className="text-[10px] text-amber-400 font-semibold">{roleLabel}</p>
+              </div>
               <button
-                onClick={() => handleNavClick('ai-planner')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white text-xs font-bold shadow-md shadow-amber-600/20"
+                onClick={onLogout}
+                className="ml-2 text-slate-400 hover:text-red-400 transition-colors"
+                title="Keluar"
+                aria-label="Keluar"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">AI Trip</span>
-              </button>
-
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                <LogOut className="w-4 h-4" />
               </button>
             </div>
+          </div>
+
+          {/* Tombol menu (Mobile) */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Avatar user={user} className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700" />
+
+            <button
+              onClick={() => handleNavClick('ai-planner')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white text-xs font-bold shadow-md shadow-amber-600/20"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">AI Trip</span>
+            </button>
+
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+              aria-label="Buka menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
 
         </div>
       </div>
@@ -157,6 +153,11 @@ export const Navbar = () => {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden glass-panel border-b border-slate-800 px-4 pt-3 pb-5 space-y-2 animate-fadeIn">
+          <div className="px-4 py-2 text-xs text-slate-400">
+            <p className="font-bold text-slate-200">{displayName}</p>
+            <p className="text-amber-400 font-semibold">{roleLabel}</p>
+          </div>
+
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -174,7 +175,7 @@ export const Navbar = () => {
                   <Icon className="w-5 h-5 text-amber-400" />
                   <span>{item.label}</span>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   {item.badge && (
                     <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-400 text-slate-950">
@@ -190,6 +191,14 @@ export const Navbar = () => {
               </button>
             );
           })}
+
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-300 hover:bg-red-500/10 border border-slate-800"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Keluar</span>
+          </button>
         </div>
       )}
     </header>
