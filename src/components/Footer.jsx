@@ -3,10 +3,10 @@ import { Compass, Sparkles, Heart } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const Footer = () => {
-  const { setActiveTab } = useApp();
+  const { setActiveTab, categories } = useApp();
 
   return (
-    <footer className="bg-slate-950 border-t border-slate-800 text-slate-400 text-xs py-10">
+    <footer className="bg-slate-50 border-t border-slate-200 text-slate-500 text-xs py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -15,43 +15,43 @@ export const Footer = () => {
           <div className="space-y-3 md:col-span-2">
             <div className="flex items-center gap-2">
               <img src="/logo-pin.png" alt="Logo PekaloJalan" className="h-9 w-auto shrink-0" />
-              <span className="text-xl font-bold font-serif text-white">PekaloJalan</span>
+              <span className="text-xl font-bold font-serif text-slate-900">PekaloJalan</span>
             </div>
-            <p className="text-slate-400 text-xs leading-relaxed max-w-md">
+            <p className="text-slate-500 text-xs leading-relaxed max-w-md">
               Portal Rekomendasi Wisata terkurasi & Asisten AI Trip Planner otomatis pertama di Kota Pekalongan. Memudahkan wisatawan dan warga lokal merencanakan perjalanan wisata budaya, religi, dan kuliner khas Pekalongan.
             </p>
-            <div className="pt-1 text-xs text-amber-400/90 font-medium">
+            <div className="pt-1 text-xs text-indigo-800 font-medium">
               🏆 Dikembangkan untuk Lomba Teknologi Piranti Lunak — Jambore Pemuda Kota Pekalongan 2026.
             </div>
           </div>
 
           {/* Col 2: Navigasi Cepat */}
           <div className="space-y-3">
-            <h4 className="text-sm font-bold text-white font-serif uppercase tracking-wider">Navigasi Utama</h4>
+            <h4 className="text-sm font-bold text-slate-900 font-serif uppercase tracking-wider">Navigasi Utama</h4>
             <ul className="space-y-2">
               <li>
-                <button onClick={() => setActiveTab('home')} className="hover:text-amber-300 transition-colors">
+                <button onClick={() => setActiveTab('home')} className="hover:text-indigo-900 transition-colors">
                   Beranda Utama
                 </button>
               </li>
               <li>
-                <button onClick={() => setActiveTab('directory')} className="hover:text-amber-300 transition-colors">
-                  Direktori 8 Kategori Tempat
+                <button onClick={() => setActiveTab('directory')} className="hover:text-indigo-900 transition-colors">
+                  Direktori {categories.length} Kategori Tempat
                 </button>
               </li>
               <li>
-                <button onClick={() => setActiveTab('ai-planner')} className="hover:text-amber-300 transition-colors flex items-center gap-1">
+                <button onClick={() => setActiveTab('ai-planner')} className="hover:text-indigo-900 transition-colors flex items-center gap-1">
                   <span>AI Trip Planner Chat</span>
-                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <Sparkles className="w-3 h-3 text-indigo-800" />
                 </button>
               </li>
               <li>
-                <button onClick={() => setActiveTab('saved')} className="hover:text-amber-300 transition-colors">
+                <button onClick={() => setActiveTab('saved')} className="hover:text-indigo-900 transition-colors">
                   Tempat Impian Tersimpan
                 </button>
               </li>
               <li>
-                <button onClick={() => setActiveTab('admin')} className="hover:text-amber-300 transition-colors">
+                <button onClick={() => setActiveTab('admin')} className="hover:text-indigo-900 transition-colors">
                   Panel Pengelola (Admin)
                 </button>
               </li>
@@ -60,8 +60,8 @@ export const Footer = () => {
 
           {/* Col 3: Kategori Khas */}
           <div className="space-y-3">
-            <h4 className="text-sm font-bold text-white font-serif uppercase tracking-wider">Kategori Ikonik</h4>
-            <ul className="space-y-2 text-slate-400">
+            <h4 className="text-sm font-bold text-slate-900 font-serif uppercase tracking-wider">Kategori Ikonik</h4>
+            <ul className="space-y-2 text-slate-500">
               <li>• Wisata Budaya & Museum Batik</li>
               <li>• Kuliner Street Food (Soto Tauto & Megono)</li>
               <li>• Wisata Religi & Masjid Agung</li>
@@ -73,7 +73,7 @@ export const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <p>© 2026 PekaloJalan. Seluruh Hak Cipta Dilindungi.</p>
           <div className="flex items-center gap-1">
             <span>Dibuat dengan bangga untuk Kota Pekalongan</span>

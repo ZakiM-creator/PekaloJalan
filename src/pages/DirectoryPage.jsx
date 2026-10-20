@@ -78,39 +78,39 @@ export const DirectoryPage = () => {
       
       {/* Header Info */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 text-xs font-semibold border border-amber-500/20">
-          <Compass className="w-3.5 h-3.5 text-amber-400" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-800 text-xs font-semibold border border-indigo-100">
+          <Compass className="w-3.5 h-3.5 text-indigo-800" />
           <span>Eksplorasi Kota Batik Pekalongan</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-bold font-serif text-white">
+        <h1 className="text-3xl sm:text-4xl font-bold font-serif text-slate-900">
           {selectedCategory === 'all' 
             ? 'Direktori Semua Tempat Wisata & Kuliner' 
             : `Kategori: ${activeCategoryObj?.name || selectedCategory}`}
         </h1>
 
-        <p className="text-slate-400 text-xs sm:text-sm max-w-2xl">
+        <p className="text-slate-500 text-xs sm:text-sm max-w-2xl">
           Temukan tempat wisata budaya, kuliner megono, cafe kekinian, hingga toko batik terkurasi di Kota Pekalongan.
         </p>
       </div>
 
       {/* Controls & Filter Bar */}
-      <div className="space-y-4 glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800">
+      <div className="space-y-4 glass-panel p-4 sm:p-5 rounded-2xl border border-slate-200">
         
         {/* Search Input */}
         <div className="relative">
-          <Search className="w-5 h-5 text-amber-400 absolute left-4 top-1/2 -translate-y-1/2" />
+          <Search className="w-5 h-5 text-indigo-800 absolute left-4 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari berdasarkan nama tempat, lokasi, fasilitas, atau kata kunci..."
-            className="w-full pl-12 pr-10 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-white placeholder-slate-400 text-sm focus:outline-none focus:border-amber-500"
+            className="w-full pl-12 pr-10 py-3 rounded-xl bg-white/90 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-slate-400"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-900"
             >
               <X className="w-4 h-4" />
             </button>
@@ -122,84 +122,84 @@ export const DirectoryPage = () => {
 
         {/* Filter Kecamatan & Kelurahan */}
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
-            <MapPin className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-slate-400">Kecamatan:</span>
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+            <MapPin className="w-3.5 h-3.5 text-indigo-800" />
+            <span className="text-slate-500">Kecamatan:</span>
             <select
               value={kecamatan}
               onChange={(e) => { setKecamatan(e.target.value); setKelurahan(''); }}
-              className="bg-transparent text-amber-300 font-semibold focus:outline-none cursor-pointer"
+              className="bg-transparent text-indigo-800 font-semibold focus:outline-none cursor-pointer"
             >
-              <option value="" className="bg-slate-900 text-white">Semua</option>
+              <option value="" className="bg-white text-slate-900">Semua</option>
               {daftarKecamatan.map((k) => (
-                <option key={k} value={k} className="bg-slate-900 text-white">{k}</option>
+                <option key={k} value={k} className="bg-white text-slate-900">{k}</option>
               ))}
             </select>
           </div>
-          <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
-            <MapPin className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-slate-400">Kelurahan:</span>
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+            <MapPin className="w-3.5 h-3.5 text-indigo-800" />
+            <span className="text-slate-500">Kelurahan:</span>
             <select
               value={kelurahan}
               onChange={(e) => setKelurahan(e.target.value)}
-              className="bg-transparent text-amber-300 font-semibold focus:outline-none cursor-pointer"
+              className="bg-transparent text-indigo-800 font-semibold focus:outline-none cursor-pointer"
             >
-              <option value="" className="bg-slate-900 text-white">Semua</option>
+              <option value="" className="bg-white text-slate-900">Semua</option>
               {daftarKelurahan.map((k) => (
-                <option key={k} value={k} className="bg-slate-900 text-white">{k}</option>
+                <option key={k} value={k} className="bg-white text-slate-900">{k}</option>
               ))}
             </select>
           </div>
           {(kecamatan || kelurahan) && (
             <button
               onClick={() => { setKecamatan(''); setKelurahan(''); }}
-              className="px-3 py-1.5 rounded-xl text-slate-400 hover:text-white border border-slate-800"
+              className="px-3 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 border border-slate-200"
             >
               Hapus filter wilayah
             </button>
           )}
           {sortBy === 'nearest' && statusPosisi === 'mencari' && (
-            <span className="flex items-center gap-1.5 text-slate-400"><Navigation className="w-3.5 h-3.5 text-amber-400" />Mencari lokasi Anda...</span>
+            <span className="flex items-center gap-1.5 text-slate-500"><Navigation className="w-3.5 h-3.5 text-indigo-800" />Mencari lokasi Anda...</span>
           )}
           {statusPosisi === 'ditolak' && (
-            <span className="text-red-300">Lokasi tidak bisa diakses. Izinkan akses lokasi di browser lalu pilih lagi.</span>
+            <span className="text-red-600">Lokasi tidak bisa diakses. Izinkan akses lokasi di browser lalu pilih lagi.</span>
           )}
           {statusPosisi === 'tidak-didukung' && (
-            <span className="text-red-300">Browser ini tidak mendukung lokasi.</span>
+            <span className="text-red-600">Browser ini tidak mendukung lokasi.</span>
           )}
         </div>
 
         {/* Sort & View Mode Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200 text-xs">
           
-          <div className="text-slate-400">
-            Menampilkan <span className="font-bold text-amber-400">{sortedPlaces.length}</span> tempat terkurasi
+          <div className="text-slate-500">
+            Menampilkan <span className="font-bold text-indigo-800">{sortedPlaces.length}</span> tempat terkurasi
           </div>
 
           <div className="flex items-center gap-3">
             {/* Sort Selector */}
-            <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-slate-400">Urutkan:</span>
+            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-800" />
+              <span className="text-slate-500">Urutkan:</span>
               <select
                 value={sortBy}
                 onChange={(e) => gantiUrutan(e.target.value)}
-                className="bg-transparent text-amber-300 font-semibold focus:outline-none cursor-pointer"
+                className="bg-transparent text-indigo-800 font-semibold focus:outline-none cursor-pointer"
               >
-                <option value="rating" className="bg-slate-900 text-white">Rating Tertinggi</option>
-                <option value="name" className="bg-slate-900 text-white">Nama (A-Z)</option>
-                <option value="price-asc" className="bg-slate-900 text-white">Biaya Terendah</option>
-                <option value="price-desc" className="bg-slate-900 text-white">Biaya Tertinggi</option>
-                <option value="nearest" className="bg-slate-900 text-white">Terdekat dari Saya</option>
+                <option value="rating" className="bg-white text-slate-900">Rating Tertinggi</option>
+                <option value="name" className="bg-white text-slate-900">Nama (A-Z)</option>
+                <option value="price-asc" className="bg-white text-slate-900">Biaya Terendah</option>
+                <option value="price-desc" className="bg-white text-slate-900">Biaya Tertinggi</option>
+                <option value="nearest" className="bg-white text-slate-900">Terdekat dari Saya</option>
               </select>
             </div>
 
             {/* View Switcher */}
-            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'grid' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                  viewMode === 'grid' ? 'bg-slate-900 text-white font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Tampilan Grid"
               >
@@ -208,7 +208,7 @@ export const DirectoryPage = () => {
               <button
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'list' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                  viewMode === 'list' ? 'bg-slate-900 text-white font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Tampilan Daftar"
               >
@@ -229,12 +229,12 @@ export const DirectoryPage = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 glass-panel rounded-3xl border border-slate-800 space-y-4">
-          <div className="w-16 h-16 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto text-2xl font-serif">
+        <div className="text-center py-16 glass-panel rounded-3xl border border-slate-200 space-y-4">
+          <div className="w-16 h-16 rounded-full bg-indigo-50 text-indigo-800 flex items-center justify-center mx-auto text-2xl font-serif">
             🔍
           </div>
-          <h3 className="text-xl font-bold font-serif text-white">Tempat Tidak Ditemukan</h3>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
+          <h3 className="text-xl font-bold font-serif text-slate-900">Tempat Tidak Ditemukan</h3>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
             Maaf, kami tidak menemukan tempat yang sesuai dengan pencarian "{searchQuery}". Coba kata kunci lain atau pilih kategori berbeda.
           </p>
           <button
@@ -244,7 +244,7 @@ export const DirectoryPage = () => {
               setKecamatan('');
               setKelurahan('');
             }}
-            className="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition-all"
+            className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-700 transition-all"
           >
             Reset Semua Filter
           </button>

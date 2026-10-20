@@ -24,9 +24,9 @@ const LoadingScreen = ({ text }) => {
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4 px-4">
       <img src="/logo-pin.png" alt="Logo PekaloJalan" className="h-16 w-auto animate-pulse" />
-      <p className="text-amber-400 text-xs font-semibold tracking-wider animate-pulse">{text}</p>
+      <p className="text-indigo-800 text-xs font-semibold tracking-wider animate-pulse">{text}</p>
       {slow && (
-        <p className="text-xs text-slate-400 text-center max-w-xs">
+        <p className="text-xs text-slate-500 text-center max-w-xs">
           Masih menghubungi database. Periksa koneksi internet Anda. Halaman akan tampil otomatis.
         </p>
       )}
@@ -60,7 +60,7 @@ const AppGate = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center">
         <LoadingScreen text="Memeriksa sesi login..." />
       </div>
     );
@@ -69,7 +69,7 @@ const AppGate = () => {
   if (!user || !role) return <LoginPage />;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between selection:bg-indigo-100 selection:text-slate-900">
       <Navbar />
       <MainContent />
       <PlaceDetailModal />

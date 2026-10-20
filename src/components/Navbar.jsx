@@ -44,7 +44,7 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80">
+    <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
 
@@ -56,25 +56,25 @@ export const Navbar = () => {
             <img
               src="/logo-pin.png"
               alt="Logo PekaloJalan"
-              className="h-10 sm:h-12 w-auto shrink-0 drop-shadow-[0_4px_10px_rgba(245,158,11,0.25)] group-hover:scale-105 transition-transform"
+              className="h-10 sm:h-12 w-auto shrink-0 group-hover:scale-105 transition-transform"
             />
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 bg-clip-text text-transparent font-serif tracking-tight">
+                <span className="text-xl sm:text-2xl font-bold text-indigo-800 font-serif tracking-tight">
                   PekaloJalan
                 </span>
-                <span className="text-xs uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 hidden sm:inline-block">
+                <span className="text-xs uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-800 border border-indigo-100 hidden sm:inline-block">
                   Kota Batik
                 </span>
               </div>
-              <p className="text-xs text-slate-400 tracking-wider hidden sm:block">
+              <p className="text-xs text-slate-500 tracking-wider hidden sm:block">
                 Portal Rekomendasi Wisata & AI Trip Planner
               </p>
             </div>
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-900/60 p-1.5 rounded-full border border-slate-800">
+          <nav className="hidden md:flex items-center gap-1 bg-white p-1.5 rounded-full border border-slate-200">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -84,21 +84,21 @@ export const Navbar = () => {
                   onClick={() => handleNavClick(item.id)}
                   className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md shadow-amber-600/30'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                      ? 'bg-slate-900 text-white shadow-md'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-amber-400/80'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-indigo-800'}`} />
                   <span>{item.label}</span>
 
                   {item.badge && (
-                    <span className="px-1.5 py-0.5 text-xs font-bold rounded-full bg-amber-400 text-slate-950 animate-pulse">
+                    <span className="px-1.5 py-0.5 text-xs font-bold rounded-full bg-indigo-100 text-indigo-900">
                       {item.badge}
                     </span>
                   )}
 
                   {typeof item.count === 'number' && item.count > 0 && (
-                    <span className="w-4 h-4 flex items-center justify-center rounded-full text-[10px] bg-amber-500 text-slate-950 font-bold">
+                    <span className="w-4 h-4 flex items-center justify-center rounded-full text-[10px] bg-slate-900 text-white font-bold">
                       {item.count}
                     </span>
                   )}
@@ -109,15 +109,15 @@ export const Navbar = () => {
 
           {/* Profil dan Logout (Desktop) */}
           <div className="hidden md:flex items-center ml-2">
-            <div className="flex items-center gap-3 bg-slate-900/60 pl-2 pr-4 py-1.5 rounded-full border border-slate-800">
-              <Avatar user={user} className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700" />
+            <div className="flex items-center gap-3 bg-white pl-2 pr-4 py-1.5 rounded-full border border-slate-200">
+              <Avatar user={user} className="w-7 h-7 rounded-full bg-slate-100 border border-slate-300" />
               <div className="hidden lg:block leading-tight">
-                <p className="text-xs font-bold text-slate-200">{displayName}</p>
-                <p className="text-[10px] text-amber-400 font-semibold">{roleLabel}</p>
+                <p className="text-xs font-bold text-slate-700">{displayName}</p>
+                <p className="text-[10px] text-indigo-800 font-semibold">{roleLabel}</p>
               </div>
               <button
                 onClick={onLogout}
-                className="ml-2 text-slate-400 hover:text-red-400 transition-colors"
+                className="ml-2 text-slate-500 hover:text-red-600 transition-colors"
                 title="Keluar"
                 aria-label="Keluar"
               >
@@ -128,11 +128,11 @@ export const Navbar = () => {
 
           {/* Tombol menu (Mobile) */}
           <div className="flex items-center gap-2 md:hidden">
-            <Avatar user={user} className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700" />
+            <Avatar user={user} className="w-8 h-8 rounded-full bg-slate-100 border border-slate-300" />
 
             <button
               onClick={() => handleNavClick('ai-planner')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white text-xs font-bold shadow-md shadow-amber-600/20"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold shadow-md"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">AI Trip</span>
@@ -140,7 +140,7 @@ export const Navbar = () => {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+              className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
               aria-label="Buka menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -152,10 +152,10 @@ export const Navbar = () => {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden glass-panel border-b border-slate-800 px-4 pt-3 pb-5 space-y-2 animate-fadeIn">
-          <div className="px-4 py-2 text-xs text-slate-400">
-            <p className="font-bold text-slate-200">{displayName}</p>
-            <p className="text-amber-400 font-semibold">{roleLabel}</p>
+        <div className="md:hidden glass-panel border-b border-slate-200 px-4 pt-3 pb-5 space-y-2 animate-fadeIn">
+          <div className="px-4 py-2 text-xs text-slate-500">
+            <p className="font-bold text-slate-700">{displayName}</p>
+            <p className="text-indigo-800 font-semibold">{roleLabel}</p>
           </div>
 
           {navItems.map((item) => {
@@ -167,23 +167,23 @@ export const Navbar = () => {
                 onClick={() => handleNavClick(item.id)}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    : 'text-slate-300 hover:bg-slate-800/60'
+                    ? 'bg-indigo-100 text-indigo-800 border border-indigo-100'
+                    : 'text-slate-600 hover:bg-slate-100'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon className="w-5 h-5 text-amber-400" />
+                  <Icon className="w-5 h-5 text-indigo-800" />
                   <span>{item.label}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   {item.badge && (
-                    <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-400 text-slate-950">
+                    <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-slate-900 text-white">
                       {item.badge}
                     </span>
                   )}
                   {typeof item.count === 'number' && item.count > 0 && (
-                    <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-500 text-slate-950">
+                    <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-slate-900 text-white">
                       {item.count}
                     </span>
                   )}
@@ -194,7 +194,7 @@ export const Navbar = () => {
 
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-300 hover:bg-red-500/10 border border-slate-800"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 border border-slate-200"
           >
             <LogOut className="w-5 h-5" />
             <span>Keluar</span>

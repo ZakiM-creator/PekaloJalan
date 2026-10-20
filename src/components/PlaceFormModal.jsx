@@ -39,7 +39,7 @@ const fromPlace = (place) => ({
   managerEmail: place.managerEmail || ''
 });
 
-const inputClass = 'w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-amber-500 transition-colors';
+const inputClass = 'w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-slate-400 transition-colors';
 
 /**
  * Formulir tambah / ubah tempat, dipakai bersama oleh Admin dan Pengelola Wisata.
@@ -139,13 +139,13 @@ export const PlaceFormModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
-        <div className="p-5 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-          <h3 className="text-lg font-bold font-serif text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/90 backdrop-blur-md animate-fadeIn">
+      <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-lg max-h-[90vh] flex flex-col">
+        <div className="p-5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <h3 className="text-lg font-bold font-serif text-slate-900">
             {place ? 'Ubah Data Tempat' : 'Tambah Tempat Wisata / Kuliner Baru'}
           </h3>
-          <button type="button" onClick={onClose} className="p-1 text-slate-400 hover:text-white" aria-label="Tutup">
+          <button type="button" onClick={onClose} className="p-1 text-slate-500 hover:text-slate-900" aria-label="Tutup">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -154,35 +154,35 @@ export const PlaceFormModal = ({
           {status && (
             <div className={`p-3 rounded-2xl border text-xs flex items-center justify-between gap-2 ${
               status.type === 'success'
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                : 'bg-red-500/10 border-red-500/30 text-red-300'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                : 'bg-red-50 border-red-200 text-red-600'
             }`}>
               <div className="flex items-center gap-2">
                 {status.type === 'success'
-                  ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  : <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />}
+                  ? <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                  : <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />}
                 <span>{status.message}</span>
               </div>
-              <button type="button" onClick={() => setStatus(null)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white shrink-0" aria-label="Tutup pesan">
+              <button type="button" onClick={() => setStatus(null)} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 shrink-0" aria-label="Tutup pesan">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
 
           {formError && (
-            <div role="alert" className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300">
+            <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600">
               {formError}
             </div>
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">Nama Tempat *</label>
+              <label className="font-semibold text-slate-600">Nama Tempat *</label>
               <input type="text" value={formData.name} onChange={(e) => setField('name', e.target.value)}
                 placeholder="mis. Museum Batik Pekalongan" className={inputClass} required />
             </div>
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">Kategori *</label>
+              <label className="font-semibold text-slate-600">Kategori *</label>
               <select value={formData.category} onChange={(e) => setField('category', e.target.value)}
                 className={`${inputClass} cursor-pointer`}>
                 {categories.map((cat) => (
@@ -194,9 +194,9 @@ export const PlaceFormModal = ({
 
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="font-semibold text-slate-300">Deskripsi Lengkap *</label>
+              <label className="font-semibold text-slate-600">Deskripsi Lengkap *</label>
               <button type="button" onClick={handleAutoDescription} disabled={isGeneratingDesc}
-                className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+                className="text-[11px] text-indigo-800 hover:text-indigo-900 font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
                 title="Buat narasi budaya lokal Pekalongan dengan AI">
                 <Sparkles className={`w-3.5 h-3.5 ${isGeneratingDesc ? 'animate-spin' : ''}`} />
                 <span>{isGeneratingDesc ? 'Menulis narasi...' : 'Auto Deskripsi AI'}</span>
@@ -208,50 +208,50 @@ export const PlaceFormModal = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">Alamat Lengkap</label>
+              <label className="font-semibold text-slate-600">Alamat Lengkap</label>
               <input type="text" value={formData.address} onChange={(e) => setField('address', e.target.value)}
                 placeholder="Jl. Jetayu No.1, Pekalongan Utara" className={inputClass} />
             </div>
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">URL Google Maps</label>
+              <label className="font-semibold text-slate-600">URL Google Maps</label>
               <input type="url" value={formData.locationMapUrl} onChange={(e) => setField('locationMapUrl', e.target.value)}
                 placeholder="https://maps.google.com/..." className={inputClass} />
             </div>
           </div>
 
-          <div className="space-y-1.5 p-3 rounded-2xl bg-slate-950 border border-slate-800">
-            <label className="font-semibold text-slate-300 flex items-center justify-between">
+          <div className="space-y-1.5 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+            <label className="font-semibold text-slate-600 flex items-center justify-between">
               <span>URL Gambar / Unggah File</span>
-              {uploadingImage && <span className="text-amber-400 text-xs">Mengunggah...</span>}
+              {uploadingImage && <span className="text-indigo-800 text-xs">Mengunggah...</span>}
             </label>
             <div className="flex gap-2">
               <input type="text" value={formData.image} onChange={(e) => setField('image', e.target.value)}
                 placeholder="https://images.unsplash.com/..."
-                className="flex-1 p-2 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500" />
-              <label className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 cursor-pointer font-semibold flex items-center gap-1">
-                <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                className="flex-1 p-2 rounded-xl bg-white border border-slate-200 text-slate-900 focus:outline-none focus:border-slate-400" />
+              <label className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer font-semibold flex items-center gap-1">
+                <ImageIcon className="w-3.5 h-3.5 text-indigo-800" />
                 <span>File</span>
                 <input type="file" accept="image/*" onChange={handleImageFile} className="hidden" />
               </label>
             </div>
             {formData.image && (
-              <img src={formData.image} alt="Pratinjau" className="h-20 w-full object-cover rounded-xl mt-2 border border-slate-800" />
+              <img src={formData.image} alt="Pratinjau" className="h-20 w-full object-cover rounded-xl mt-2 border border-slate-200" />
             )}
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">Teks Kisaran Harga</label>
+              <label className="font-semibold text-slate-600">Teks Kisaran Harga</label>
               <input type="text" value={formData.priceRange} onChange={(e) => setField('priceRange', e.target.value)}
                 placeholder="Rp 15.000 / orang" className={inputClass} />
             </div>
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">Estimasi Biaya (Angka)</label>
+              <label className="font-semibold text-slate-600">Estimasi Biaya (Angka)</label>
               <input type="number" min="0" value={formData.estimatedCost} onChange={(e) => setField('estimatedCost', e.target.value)}
                 className={inputClass} />
             </div>
             <div className="space-y-1 col-span-2 sm:col-span-1">
-              <label className="font-semibold text-slate-300">Jam Buka</label>
+              <label className="font-semibold text-slate-600">Jam Buka</label>
               <input type="text" value={formData.openingHours} onChange={(e) => setField('openingHours', e.target.value)}
                 placeholder="08:00 - 17:00 WIB" className={inputClass} />
             </div>
@@ -259,12 +259,12 @@ export const PlaceFormModal = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">Fasilitas (Dipisah Koma)</label>
+              <label className="font-semibold text-slate-600">Fasilitas (Dipisah Koma)</label>
               <input type="text" value={formData.facilitiesStr} onChange={(e) => setField('facilitiesStr', e.target.value)}
                 placeholder="Parkir, Musala, Wi-Fi" className={inputClass} />
             </div>
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">Label/Tags (Dipisah Koma)</label>
+              <label className="font-semibold text-slate-600">Label/Tags (Dipisah Koma)</label>
               <input type="text" value={formData.tagsStr} onChange={(e) => setField('tagsStr', e.target.value)}
                 placeholder="Batik, Edukasi, Populer" className={inputClass} />
             </div>
@@ -272,7 +272,7 @@ export const PlaceFormModal = ({
 
           {showManagerField && (
             <div className="space-y-1">
-              <label className="font-semibold text-slate-300">Email Pengelola Tempat (opsional)</label>
+              <label className="font-semibold text-slate-600">Email Pengelola Tempat (opsional)</label>
               <input type="email" value={formData.managerEmail} onChange={(e) => setField('managerEmail', e.target.value)}
                 placeholder="pengelola@gmail.com" className={inputClass} />
               <p className="text-[11px] text-slate-500">Hanya pengelola dengan email ini yang bisa mengubah tempat. Email harus sudah didaftarkan sebagai pengelola.</p>
@@ -282,20 +282,20 @@ export const PlaceFormModal = ({
           {allowFeatured && (
             <div className="flex items-center gap-2 pt-2">
               <input type="checkbox" id="featured" checked={formData.featured}
-                onChange={(e) => setField('featured', e.target.checked)} className="w-4 h-4 rounded accent-amber-500" />
-              <label htmlFor="featured" className="font-semibold text-amber-300 cursor-pointer">
+                onChange={(e) => setField('featured', e.target.checked)} className="w-4 h-4 rounded accent-slate-900" />
+              <label htmlFor="featured" className="font-semibold text-indigo-800 cursor-pointer">
                 Tampilkan sebagai Destinasi Populer di Beranda
               </label>
             </div>
           )}
 
-          <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-800">
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-200">
             <button type="button" onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold">
+              className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold">
               Batal
             </button>
             <button type="submit" disabled={saving || uploadingImage}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-bold hover:from-amber-400 hover:to-orange-500 shadow-md shadow-amber-500/20 disabled:opacity-50">
+              className="px-6 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-700 shadow-md disabled:opacity-50">
               {saving ? 'Menyimpan...' : 'Simpan Tempat'}
             </button>
           </div>

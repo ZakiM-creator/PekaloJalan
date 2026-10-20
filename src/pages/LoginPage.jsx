@@ -30,32 +30,32 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-slate-950 text-slate-100">
-      <div className="w-full max-w-md glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6 text-center">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-slate-50 text-slate-800">
+      <div className="w-full max-w-md glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-lg space-y-6 text-center">
         <img
           src="/logo-pin.png"
           alt="Logo PekaloJalan"
-          className="h-20 w-auto mx-auto drop-shadow-[0_4px_10px_rgba(245,158,11,0.25)]"
+          className="h-20 w-auto mx-auto"
         />
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold font-serif bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold font-serif text-indigo-800">
             PekaloJalan
           </h1>
-          <p className="text-sm text-slate-300">Portal Rekomendasi Wisata & AI Trip Planner Kota Pekalongan</p>
-          <p className="text-xs text-slate-400">Masuk dengan akun Google untuk mulai menjelajah.</p>
+          <p className="text-sm text-slate-600">Portal Rekomendasi Wisata & AI Trip Planner Kota Pekalongan</p>
+          <p className="text-xs text-slate-500">Masuk dengan akun Google untuk mulai menjelajah.</p>
         </div>
 
         {!firebaseReady && (
-          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 flex items-start gap-2 text-left">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 flex items-start gap-2 text-left">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
             <span>{FIREBASE_SETUP_MESSAGE}</span>
           </div>
         )}
 
         {error && (
-          <div role="alert" className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 flex items-start gap-2 text-left">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+          <div role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 flex items-start gap-2 text-left">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
             <span>{error}</span>
           </div>
         )}

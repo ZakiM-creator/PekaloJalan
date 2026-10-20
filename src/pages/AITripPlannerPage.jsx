@@ -127,26 +127,34 @@ export const AITripPlannerPage = () => {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       
       {/* Header Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 sm:p-6 rounded-3xl border border-amber-500/30 shadow-xl hide-on-print">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 sm:p-6 rounded-3xl border border-indigo-100 shadow-xl hide-on-print">
+        <div className="flex items-center gap-4">
+        <img
+          src="/maskot-batbet.png"
+          alt="Bat Bet, maskot PekaloJalan"
+          className="h-16 sm:h-20 w-auto shrink-0 select-none"
+          draggable="false"
+        />
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold border border-amber-500/20">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-800 text-xs font-bold border border-indigo-100">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-800 animate-pulse" />
             <span>AI Conversational Trip Planner (Multi-turn)</span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold font-serif text-white flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold font-serif text-slate-900 flex items-center gap-2">
             <span>PekaloJalan AI Chat</span>
           </h1>
 
-          <p className="text-slate-400 text-xs sm:text-sm">
+          <p className="text-slate-500 text-xs sm:text-sm">
             Ketik pertanyaan atau minta rekomendasi rencana perjalanan khas Kota Pekalongan secara alami.
           </p>
+        </div>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={() => setTripPlanOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold border border-amber-500/30 transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-semibold border border-indigo-100 transition-all"
             title="Buat laporan Trip Plan dalam format PDF"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
@@ -154,10 +162,10 @@ export const AITripPlannerPage = () => {
           </button>
           <button
             onClick={handleResetChat}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-300 transition-all"
             title="Reset percakapan"
           >
-            <Trash2 className="w-3.5 h-3.5 text-red-400" />
+            <Trash2 className="w-3.5 h-3.5 text-red-600" />
             <span>Reset Chat</span>
           </button>
         </div>
@@ -165,7 +173,7 @@ export const AITripPlannerPage = () => {
 
       {/* Suggestion Prompt Chips */}
       <div className="space-y-2 hide-on-print">
-        <div className="flex items-center gap-1.5 text-xs text-amber-400 font-bold uppercase tracking-wider">
+        <div className="flex items-center gap-1.5 text-xs text-indigo-800 font-bold uppercase tracking-wider">
           <Lightbulb className="w-3.5 h-3.5" />
           <span>Contoh Permintaan Cepat (Klik untuk Mencoba):</span>
         </div>
@@ -176,7 +184,7 @@ export const AITripPlannerPage = () => {
               key={idx}
               onClick={() => handleSendMessage(prompt)}
               disabled={isTyping}
-              className="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-amber-500/10 hover:border-amber-500/50 text-slate-300 hover:text-amber-300 text-xs font-medium border border-slate-800 transition-all text-left"
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 hover:border-indigo-200 text-slate-600 hover:text-indigo-900 text-xs font-medium border border-slate-200 transition-all text-left"
             >
               ✨ {prompt}
             </button>
@@ -185,7 +193,7 @@ export const AITripPlannerPage = () => {
       </div>
 
       {/* Chat Conversation Box */}
-      <div className="glass-panel rounded-3xl border border-slate-800 overflow-hidden flex flex-col h-[650px] shadow-2xl print-chat-container">
+      <div className="glass-panel rounded-3xl border border-slate-200 overflow-hidden flex flex-col h-[650px] shadow-lg print-chat-container">
         
         {/* Messages Container */}
         <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 print-chat-container">
@@ -197,8 +205,8 @@ export const AITripPlannerPage = () => {
                 className={`flex gap-3 sm:gap-4 ${isUser ? 'justify-end' : 'justify-start'}`}
               >
                 {!isUser && (
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-slate-950 font-bold shrink-0 shadow-md shadow-amber-500/20">
-                    <Bot className="w-5 h-5 text-slate-950" />
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0 shadow-md">
+                    <Bot className="w-5 h-5 text-white" />
                   </div>
                 )}
 
@@ -207,8 +215,8 @@ export const AITripPlannerPage = () => {
                   <div
                     className={`p-4 sm:p-5 rounded-3xl text-xs sm:text-sm leading-relaxed ${
                       isUser
-                        ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-tr-none shadow-lg shadow-amber-600/15 print-user-bubble'
-                        : 'bg-slate-900 border border-slate-800 text-slate-100 rounded-tl-none print-ai-bubble'
+                        ? 'bg-slate-900 text-white rounded-tr-none shadow-lg print-user-bubble'
+                        : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none print-ai-bubble'
                     }`}
                   >
                     <p className="whitespace-pre-line font-sans">{msg.text}</p>
@@ -216,7 +224,7 @@ export const AITripPlannerPage = () => {
                     {msg.tripPlanCta && (
                       <button
                         onClick={() => setTripPlanOpen(true)}
-                        className="mt-3 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400"
+                        className="mt-3 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-700"
                       >
                         <FileDown className="w-3.5 h-3.5" />
                         <span>Buka form Trip Plan PDF</span>
@@ -242,28 +250,43 @@ export const AITripPlannerPage = () => {
                 </div>
 
                 {isUser && (
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-bold shrink-0">
-                    <User className="w-5 h-5 text-amber-400" />
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-600 font-bold shrink-0">
+                    <User className="w-5 h-5 text-indigo-800" />
                   </div>
                 )}
               </div>
             );
           })}
 
+          {/* Maskot Bat Bet: tampil saat percakapan baru dimulai */}
+          {chatMessages.length <= 1 && !isTyping && (
+            <div className="flex flex-col items-center gap-2 pt-6 pb-2 text-center hide-on-print">
+              <img
+                src="/maskot-batbet.png"
+                alt="Bat Bet, maskot PekaloJalan"
+                className="h-28 sm:h-36 w-auto opacity-95 select-none"
+                draggable="false"
+              />
+              <p className="text-xs sm:text-sm text-slate-500 max-w-xs">
+                Halo, saya <span className="font-bold text-slate-800">Bat Bet</span>. Ceritakan rencana liburan Anda di Pekalongan.
+              </p>
+            </div>
+          )}
+
           {/* Typing Indicator */}
           {isTyping && (
             <div className="flex gap-3 items-center hide-on-print">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center text-slate-950 font-bold shrink-0">
-                <Bot className="w-5 h-5 text-slate-950" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0">
+                <Bot className="w-5 h-5 text-white" />
               </div>
 
-              <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 text-xs text-amber-400 flex items-center gap-2">
+              <div className="p-4 rounded-3xl bg-white border border-slate-200 text-xs text-indigo-800 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 animate-spin" />
                 <span>PekaloJalan AI sedang meracik rekomendasi perjalanan...</span>
                 <div className="flex gap-1 ml-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 typing-dot-1" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 typing-dot-2" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 typing-dot-3" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-900 typing-dot-1" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-900 typing-dot-2" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-900 typing-dot-3" />
                 </div>
               </div>
             </div>
@@ -273,7 +296,7 @@ export const AITripPlannerPage = () => {
         </div>
 
         {/* Chat Input Bar */}
-        <div className="p-3 sm:p-4 bg-slate-950 border-t border-slate-800 hide-on-print">
+        <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 hide-on-print">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -286,14 +309,14 @@ export const AITripPlannerPage = () => {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Tuliskan keinginan liburan Anda (mis. '1 hari di Pekalongan, budget 200rb, suka soto tauto')..."
-              className="flex-1 px-4 py-3 sm:py-3.5 rounded-2xl bg-slate-900 border border-slate-800 text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-amber-500"
+              className="flex-1 px-4 py-3 sm:py-3.5 rounded-2xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-slate-400"
               disabled={isTyping}
             />
 
             <button
               type="submit"
               disabled={!inputText.trim() || isTyping}
-              className="px-5 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-bold text-xs sm:text-sm hover:from-amber-400 hover:to-orange-500 disabled:opacity-50 transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/20"
+              className="px-5 py-3 sm:py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-xs sm:text-sm hover:bg-slate-700 disabled:opacity-50 transition-all flex items-center gap-1.5 shadow-md"
             >
               <span>Kirim</span>
               <Send className="w-4 h-4" />
