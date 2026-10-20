@@ -1,0 +1,23 @@
+Sumber        : USPAR Kota Pekalongan, per 9 Oktober 2026
+Baris mentah  : 255
+Baris hasil   : 243
+Dilewati ganda: 2
+Dilewati karena sama dengan data contoh: 10
+Koordinat valid: 243
+Koordinat bermasalah: 0
+Per kategori aplikasi:
+  cafe         11
+  hiburan      12
+  layanan      28
+  oleh-oleh    2
+  penginapan   27
+  religi       1
+  resto        155
+  wisata       7
+Deskripsi asli USPAR (>=40 huruf): 62
+Punya telepon : 144
+Punya website : 10
+Berizin TDUP  : 34
+Bersertifikasi: 20
+Akomodasi dengan harga: 8
+Masalah tercatat (perlu_dicek.csv): 201

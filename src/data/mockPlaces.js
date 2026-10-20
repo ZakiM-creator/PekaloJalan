@@ -6,7 +6,8 @@ export const CATEGORIES = [
   { id: 'hiburan', name: 'Hiburan & Recreasi', icon: 'Ticket', color: 'from-purple-600 to-pink-600', description: 'Bioskop, taman kota & hiburan' },
   { id: 'oleh-oleh', name: 'Oleh-oleh & Toko Batik', icon: 'ShoppingBag', color: 'from-emerald-600 to-teal-700', description: 'Pusat belanja batik & buah tangan' },
   { id: 'religi', name: 'Wisata Religi', icon: 'Landmark', color: 'from-cyan-600 to-blue-700', description: 'Masjid bersejarah & situs ziarah' },
-  { id: 'street-food', name: 'Kuliner Kaki Lima', icon: 'Flame', color: 'from-orange-500 to-yellow-600', description: 'Soto Tauto, Megono & jajanan malam' }
+  { id: 'street-food', name: 'Kuliner Kaki Lima', icon: 'Flame', color: 'from-orange-500 to-yellow-600', description: 'Soto Tauto, Megono & jajanan malam' },
+  { id: 'layanan', name: 'Layanan Wisata', icon: 'Briefcase', color: 'from-slate-500 to-slate-700', description: 'Biro tour, transportasi, pemandu & gedung pertemuan' }
 ];
 
 export const INITIAL_PLACES = [

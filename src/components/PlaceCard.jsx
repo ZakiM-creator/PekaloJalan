@@ -58,9 +58,18 @@ export const PlaceCard = ({ place }) => {
 
         {/* Rating Overlay */}
         <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-900/90 text-amber-400 border border-slate-700 text-xs font-bold backdrop-blur-md">
-          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-          <span>{place.rating}</span>
-          <span className="text-xs text-slate-400 font-normal">({place.reviewsCount})</span>
+          {place.rating > 0 ? (
+            <>
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <span>{place.rating}</span>
+              <span className="text-xs text-slate-400 font-normal">({place.reviewsCount})</span>
+            </>
+          ) : (
+            <>
+              <Star className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-slate-300 font-medium">Belum ada rating</span>
+            </>
+          )}
         </div>
       </div>
 
