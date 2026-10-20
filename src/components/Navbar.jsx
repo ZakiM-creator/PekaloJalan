@@ -30,19 +30,21 @@ export const Navbar = () => {
             onClick={() => handleNavClick('home')}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-              <span className="text-xl sm:text-2xl font-black text-slate-950 font-serif">P</span>
-            </div>
+            <img
+              src="/logo-pin.png"
+              alt="Logo PekaloJalan"
+              className="h-10 sm:h-12 w-auto shrink-0 drop-shadow-[0_4px_10px_rgba(245,158,11,0.25)] group-hover:scale-105 transition-transform"
+            />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 bg-clip-text text-transparent font-serif tracking-tight">
                   PekaloJalan
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 hidden sm:inline-block">
+                <span className="text-xs uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 hidden sm:inline-block">
                   Kota Batik
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 tracking-wider hidden sm:block">
+              <p className="text-xs text-slate-400 tracking-wider hidden sm:block">
                 Portal Rekomendasi Wisata & AI Trip Planner
               </p>
             </div>
@@ -67,7 +69,7 @@ export const Navbar = () => {
                   <span>{item.label}</span>
 
                   {item.badge && (
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-amber-400 text-slate-950 animate-pulse">
+                    <span className="px-1.5 py-0.5 text-xs font-bold rounded-full bg-amber-400 text-slate-950 animate-pulse">
                       {item.badge}
                     </span>
                   )}
@@ -175,12 +177,12 @@ export const Navbar = () => {
                 
                 <div className="flex items-center gap-2">
                   {item.badge && (
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-400 text-slate-950">
+                    <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-400 text-slate-950">
                       {item.badge}
                     </span>
                   )}
                   {typeof item.count === 'number' && item.count > 0 && (
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-slate-950">
+                    <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-500 text-slate-950">
                       {item.count}
                     </span>
                   )}

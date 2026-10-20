@@ -16,9 +16,7 @@ const MainContent = () => {
   if (loading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 animate-spin flex items-center justify-center font-bold text-slate-950 font-serif">
-          P
-        </div>
+        <img src="/logo-pin.png" alt="Logo PekaloJalan" className="h-16 w-auto animate-pulse" />
         <p className="text-amber-400 text-xs font-semibold tracking-wider animate-pulse">
           Memuat PekaloJalan...
         </p>

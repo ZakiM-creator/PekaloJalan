@@ -234,7 +234,7 @@ export const AdminPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 sm:p-6 rounded-3xl border border-slate-800">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
               Sesi Admin Aktif
             </span>
             <span className="text-xs text-slate-400">| {adminUser.email}</span>
@@ -318,10 +318,10 @@ export const AdminPage = () => {
                     </td>
                     <td className="py-3 px-4">
                       <p className="font-bold text-white text-sm">{place.name}</p>
-                      <p className="text-[11px] text-slate-400 truncate max-w-xs">{place.address}</p>
+                      <p className="text-xs text-slate-400 truncate max-w-xs">{place.address}</p>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
                         {categoryObj ? categoryObj.name : place.category}
                       </span>
                     </td>
@@ -452,7 +452,7 @@ export const AdminPage = () => {
               <div className="space-y-1.5 p-3 rounded-2xl bg-slate-950 border border-slate-800">
                 <label className="font-semibold text-slate-300 flex items-center justify-between">
                   <span>URL Gambar / Unggah File</span>
-                  {uploadingImage && <span className="text-amber-400 text-[10px]">Mengunggah...</span>}
+                  {uploadingImage && <span className="text-amber-400 text-xs">Mengunggah...</span>}
                 </label>
                 
                 <div className="flex gap-2">

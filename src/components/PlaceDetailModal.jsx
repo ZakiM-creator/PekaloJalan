@@ -70,7 +70,7 @@ export const PlaceDetailModal = () => {
               <Star className="w-5 h-5 text-amber-400 fill-amber-400 shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-white text-sm leading-tight">{place.rating} / 5.0</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">({place.reviewsCount} Ulasan)</p>
+                <p className="text-xs text-slate-400 mt-0.5">({place.reviewsCount} Ulasan)</p>
               </div>
             </div>
 
@@ -78,7 +78,7 @@ export const PlaceDetailModal = () => {
               <Tag className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-emerald-400 text-sm leading-tight break-words whitespace-normal">{place.priceRange.split('/')[0]}</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Perkiraan Biaya</p>
+                <p className="text-xs text-slate-400 mt-0.5">Perkiraan Biaya</p>
               </div>
             </div>
 
@@ -86,7 +86,7 @@ export const PlaceDetailModal = () => {
               <Clock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-white text-sm leading-tight break-words whitespace-normal">{place.openingHours}</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Jam Operasional</p>
+                <p className="text-xs text-slate-400 mt-0.5">Jam Operasional</p>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@ export const PlaceDetailModal = () => {
               <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider">Label Kategori</h3>
               <div className="flex flex-wrap gap-1.5">
                 {place.tags.map((t, idx) => (
-                  <span key={idx} className="px-2.5 py-0.5 rounded-full text-[11px] bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                  <span key={idx} className="px-2.5 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-300 border border-amber-500/20">
                     #{t}
                   </span>
                 ))}
