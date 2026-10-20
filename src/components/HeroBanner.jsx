@@ -43,7 +43,7 @@ export const HeroBanner = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari Soto Tauto, Museum Batik, Hotel, Cafe..."
+                aria-label="Cari tempat"
                 className="w-full pl-12 pr-28 py-3.5 sm:py-4 rounded-2xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 backdrop-blur-md transition-all"
               />
               <button
