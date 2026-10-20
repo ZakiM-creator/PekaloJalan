@@ -30,9 +30,11 @@ export const Navbar = () => {
             onClick={() => handleNavClick('home')}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-              <span className="text-xl sm:text-2xl font-black text-slate-950 font-serif">P</span>
-            </div>
+            <img
+              src="/logo-pin.png"
+              alt="Logo PekaloJalan"
+              className="h-10 sm:h-12 w-auto shrink-0 drop-shadow-[0_4px_10px_rgba(245,158,11,0.25)] group-hover:scale-105 transition-transform"
+            />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 bg-clip-text text-transparent font-serif tracking-tight">

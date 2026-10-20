@@ -14,9 +14,7 @@ export const Footer = () => {
           {/* Col 1: Brand Info */}
           <div className="space-y-3 md:col-span-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-600 to-orange-500 flex items-center justify-center font-bold text-slate-950 font-serif text-lg">
-                P
-              </div>
+              <img src="/logo-pin.png" alt="Logo PekaloJalan" className="h-9 w-auto shrink-0" />
               <span className="text-xl font-bold font-serif text-white">PekaloJalan</span>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed max-w-md">
