@@ -10,11 +10,21 @@ export const DirectoryPage = () => {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
   // Sort logic
+  // Harga 0 dengan hargaTersedia === false berarti "belum diketahui", bukan gratis.
+  // Pada urutan harga, tempat tanpa harga selalu diletakkan paling bawah.
+  const hargaTidakDiketahui = (p) => p.hargaTersedia === false;
+  const byName = (a, b) => a.name.localeCompare(b.name);
+
   const sortedPlaces = [...filteredPlaces].sort((a, b) => {
-    if (sortBy === 'rating') return b.rating - a.rating;
-    if (sortBy === 'name') return a.name.localeCompare(b.name);
-    if (sortBy === 'price-asc') return (a.estimatedCost || 0) - (b.estimatedCost || 0);
-    if (sortBy === 'price-desc') return (b.estimatedCost || 0) - (a.estimatedCost || 0);
+    if (sortBy === 'name') return byName(a, b);
+    if (sortBy === 'rating') return ((b.rating || 0) - (a.rating || 0)) || byName(a, b);
+    if (sortBy === 'price-asc' || sortBy === 'price-desc') {
+      const unknownA = hargaTidakDiketahui(a);
+      const unknownB = hargaTidakDiketahui(b);
+      if (unknownA !== unknownB) return unknownA ? 1 : -1;
+      const diff = (a.estimatedCost || 0) - (b.estimatedCost || 0);
+      return (sortBy === 'price-asc' ? diff : -diff) || byName(a, b);
+    }
     return 0;
   });
 

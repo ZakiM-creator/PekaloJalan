@@ -69,8 +69,17 @@ export const PlaceDetailModal = () => {
             <div className="flex items-start gap-3 min-w-0">
               <Star className="w-5 h-5 text-amber-400 fill-amber-400 shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-white text-sm leading-tight">{place.rating} / 5.0</p>
-                <p className="text-xs text-slate-400 mt-0.5">({place.reviewsCount} Ulasan)</p>
+                {place.rating > 0 ? (
+                  <>
+                    <p className="font-bold text-white text-sm leading-tight">{place.rating} / 5.0</p>
+                    <p className="text-xs text-slate-400 mt-0.5">({place.reviewsCount} Ulasan)</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-bold text-white text-sm leading-tight">Belum ada rating</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Belum ada ulasan</p>
+                  </>
+                )}
               </div>
             </div>
 

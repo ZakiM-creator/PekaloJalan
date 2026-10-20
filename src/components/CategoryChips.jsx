@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  Compass, Coffee, UtensilsCrossed, Hotel, Ticket, ShoppingBag, Landmark, Flame, Grid 
+  Compass, Coffee, UtensilsCrossed, Hotel, Ticket, ShoppingBag, Landmark, Flame, Grid, Briefcase 
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -12,7 +12,8 @@ const ICON_MAP = {
   Ticket,
   ShoppingBag,
   Landmark,
-  Flame
+  Flame,
+  Briefcase
 };
 
 export const CategoryChips = () => {
@@ -35,7 +36,7 @@ export const CategoryChips = () => {
           <span>Semua Kategori</span>
         </button>
 
-        {/* 8 Categories */}
+        {/* Semua kategori */}
         {categories.map((cat) => {
           const IconComponent = ICON_MAP[cat.icon] || Compass;
           const isSelected = selectedCategory === cat.id;

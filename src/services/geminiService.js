@@ -1,16 +1,110 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// ---------------------------------------------------------------------------
+// Pemilihan tempat untuk AI
+// Database bisa berisi ratusan tempat. Mengirim semuanya membuat jawaban lambat
+// dan berisiko terpotong, jadi hanya tempat yang relevan dengan percakapan yang dikirim.
+// ---------------------------------------------------------------------------
+const MAKS_TEMPAT_UNTUK_AI = 40;
+const MAKS_TEMPAT_UNTUK_AI_BERKATEGORI = 50;
+
+// Kata kunci pengguna -> id kategori di CATEGORIES. Dicocokkan dari awal kata.
+const KATA_KATEGORI = {
+  wisata: ['wisata', 'pantai', 'museum', 'taman', 'mangrove', 'kano', 'alam', 'budaya', 'edukasi'],
+  cafe: ['cafe', 'kafe', 'kopi', 'ngopi', 'nongkrong', 'gelato'],
+  resto: ['makan', 'resto', 'restoran', 'kuliner', 'warung', 'sarapan', 'soto', 'nasi', 'sate', 'bakso', 'seafood'],
+  'street-food': ['kaki lima', 'jajan', 'angkringan', 'megono', 'tauto'],
+  penginapan: ['hotel', 'penginapan', 'menginap', 'nginap', 'homestay', 'bermalam'],
+  hiburan: ['hiburan', 'karaoke', 'bioskop', 'spa', 'pijat', 'fitness', 'rekreasi', 'playground'],
+  'oleh-oleh': ['oleh', 'batik', 'belanja', 'suvenir', 'souvenir', 'pasar'],
+  religi: ['religi', 'masjid', 'makam', 'ziarah', 'habib'],
+  layanan: ['tour', 'travel', 'biro', 'pemandu', 'sewa', 'rental', 'transport', 'gedung', 'meeting', 'konferensi', 'rapat']
+};
+const KATA_KECAMATAN = ['utara', 'timur', 'barat', 'selatan'];
+
+const cocokKata = (teks, kata) => new RegExp('\\b' + kata.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(teks);
+
+// Teks percakapan terbaru: pesan sekarang + dua pesan pengguna sebelumnya
+const bangunKonteks = (history = [], userMessage = '') =>
+  [userMessage, ...history.filter((h) => h.role === 'user').slice(-2).map((h) => h.text)]
+    .join(' ')
+    .toLowerCase();
+
+// Skor mutu data: tempat yang sudah dikurasi dan lengkap diutamakan
+const skorMutuTempat = (p) => {
+  let skor = 0;
+  if (p.statusData !== 'belum-dikurasi') skor += 30; // data awal buatan tangan (tanpa penanda) dianggap terkurasi
+  if (p.featured) skor += 15;
+  if (p.rating > 0) skor += Math.min(p.rating, 5) * 2;
+  skor += (p.kelengkapan || 0) / 10;
+  return skor;
+};
+
+// Urutkan SEMUA tempat dari yang paling relevan
+const urutkanTempat = (places, konteks) => {
+  const kategoriDiminta = new Set(
+    Object.entries(KATA_KATEGORI)
+      .filter(([, kata]) => kata.some((k) => cocokKata(konteks, k)))
+      .map(([id]) => id)
+  );
+  const kecamatanDiminta = KATA_KECAMATAN.filter((k) => cocokKata(konteks, k));
+
+  const dinilai = places.map((p) => {
+    let skor = skorMutuTempat(p);
+    if (kategoriDiminta.has(p.category)) skor += 40;
+    const kec = (p.kecamatan || p.address || '').toLowerCase();
+    if (kecamatanDiminta.some((k) => kec.includes(k))) skor += 25;
+    const kunciNama = (p.name || '').toLowerCase().replace(/\s*\(.*?\)\s*/g, ' ').trim();
+    if (kunciNama.length > 3 && konteks.includes(kunciNama)) skor += 100; // pengguna menyebut nama tempat
+    return { p, skor };
+  });
+  dinilai.sort((a, b) => b.skor - a.skor || a.p.name.localeCompare(b.p.name));
+  return { urut: dinilai.map((d) => d.p), adaKategoriDiminta: kategoriDiminta.size > 0 };
+};
+
+export const pilihTempatRelevan = (places, history, userMessage) => {
+  const { urut, adaKategoriDiminta } = urutkanTempat(places, bangunKonteks(history, userMessage));
+  const batas = adaKategoriDiminta ? MAKS_TEMPAT_UNTUK_AI_BERKATEGORI : MAKS_TEMPAT_UNTUK_AI;
+  if (urut.length <= batas) return urut;
+
+  // Jaminan keragaman: tiap kategori minimal punya wakil, agar rencana perjalanan tidak timpang
+  const perKategori = adaKategoriDiminta ? 1 : 3;
+  const terpilih = new Map();
+  const hitung = {};
+  for (const p of urut) {
+    hitung[p.category] = hitung[p.category] || 0;
+    if (hitung[p.category] < perKategori) {
+      terpilih.set(p.id, p);
+      hitung[p.category] += 1;
+    }
+  }
+  for (const p of urut) {
+    if (terpilih.size >= batas) break;
+    terpilih.set(p.id, p);
+  }
+  return urut.filter((p) => terpilih.has(p.id));
+};
+
+// Harga 0 dengan hargaTersedia === false = belum diketahui (bukan gratis)
+const hargaDiketahui = (p) => p.hargaTersedia !== false;
+
 // System instruction prompt for PekaloJalan AI Trip Planner
-const createSystemInstruction = (placesDatabase) => {
-  const placesFormatted = placesDatabase.map(p =>
-    `- Nama: ${p.name} | Kategori: ${p.category} | Harga Est: Rp ${p.estimatedCost.toLocaleString('id-ID')} | Alamat: ${p.address} | Rating: ${p.rating} | Jam Buka: ${p.openingHours} | Deskripsi: ${p.description}`
-  ).join('\n');
+const createSystemInstruction = (placesDatabase, totalTempat = placesDatabase.length) => {
+  const placesFormatted = placesDatabase.map(p => {
+    const harga = hargaDiketahui(p)
+      ? `Rp ${(p.estimatedCost || 0).toLocaleString('id-ID')}`
+      : 'harga belum diketahui';
+    const rating = p.rating > 0 ? p.rating : 'belum ada';
+    const wilayah = p.kecamatan ? ` | Kecamatan: ${p.kecamatan}` : '';
+    const deskripsi = (p.description || '').slice(0, 140);
+    return `- Nama: ${p.name} | Kategori: ${p.category}${wilayah} | Harga Est: ${harga} | Alamat: ${p.address} | Rating: ${rating} | Jam Buka: ${p.openingHours} | Deskripsi: ${deskripsi}`;
+  }).join('\n');
 
   return `
 Kamu adalah "PekaloJalan AI Assistant", pemandu wisata cerdas dan ramah khas Kota Pekalongan ("Kota Batik").
 Tugas utama kamu adalah membantu wisatawan dan warga lokal merencanakan perjalanan ideal di Kota Pekalongan secara percakapan (conversational).
 
-DATA TEMPAT YANG TERSEDIA DI DATABASE PEKALONALAN:
+DATA TEMPAT YANG TERSEDIA DI DATABASE PEKALONALAN (${placesDatabase.length} tempat paling relevan dari total ${totalTempat} tempat):
 ${placesFormatted}
 
 ATURAN DAN INSTRUKSI RESPONS:
@@ -64,6 +158,9 @@ ATURAN DAN INSTRUKSI RESPONS:
 
 4. Pastikan tempat yang kamu rekomendasikan mengutamakan data tempat yang ada di database di atas.
 5. Jika pengguna meminta revisi (misal "ganti resto B dengan yang murah"), perbarui jadwalnya dan sertakan kembali blok JSON terbarunya.
+6. Jangan mengarang harga, jam buka, rating, atau fasilitas. Jika data tertulis "harga belum diketahui", "belum ada", atau "belum tersedia", sampaikan apa adanya. "Harga belum diketahui" BUKAN berarti gratis.
+7. Pada blok JSON, isi estimatedCost dengan 0 untuk tempat yang harganya belum diketahui. estimatedCostPerPerson hanya menjumlahkan harga yang diketahui, dan jelaskan di summary atau tips bahwa ada tempat yang harganya belum diketahui.
+8. Jika pengguna menanyakan tempat yang tidak ada di daftar, katakan terus terang bahwa tempat itu belum ada di database dan tawarkan alternatif terdekat dari daftar.
 `;
 };
 
@@ -133,7 +230,8 @@ Instruksi: Langsung berikan teks deskripsinya saja tanpa tanda petik pembuka/pen
 export const sendMessageToGemini = async (history, userMessage, placesDatabase) => {
   const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
   const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  const systemInstruction = createSystemInstruction(placesDatabase);
+  const tempatRelevan = pilihTempatRelevan(placesDatabase, history, userMessage);
+  const systemInstruction = createSystemInstruction(tempatRelevan, placesDatabase.length);
 
   try {
     // 1. Try OpenRouter First
@@ -229,7 +327,9 @@ export const parseAIResponse = (rawText) => {
 /**
  * Smart Rule-based Local AI Trip Planner Generator Fallback
  */
-const generateLocalAIResponse = async (history, userMessage, placesDatabase) => {
+const generateLocalAIResponse = async (history, userMessage, semuaTempat) => {
+  // Urutkan agar tempat terkurasi dan paling lengkap yang dipilih lebih dulu oleh find() di bawah
+  const placesDatabase = urutkanTempat(semuaTempat, bangunKonteks(history, userMessage)).urut;
   // Simulate natural delay for realistic AI feel
   await new Promise(r => setTimeout(r, 1200));
 
@@ -301,7 +401,7 @@ Silakan ketik preferensi Anda di bawah!`,
   const eveningPlace = placesDatabase.find(p => p.id !== morningPlace?.id && p.id !== lunchPlace?.id && p.id !== afternoonPlace?.id && (p.category === 'wisata' || p.category === 'hiburan')) || placesDatabase.find(p => p.category === 'hiburan');
   if (eveningPlace) selectedPlaces.push(eveningPlace);
 
-  const totalCost = selectedPlaces.reduce((sum, p) => sum + (p.estimatedCost || 15000), 0);
+  const totalCost = selectedPlaces.reduce((sum, p) => sum + (hargaDiketahui(p) ? (p.estimatedCost || 15000) : 0), 0);
 
   const targetName = mentionedPlace ? mentionedPlace.name : (morningPlace ? morningPlace.name : "Destinasi Pilihan");
 
@@ -326,7 +426,7 @@ Silakan ketik preferensi Anda di bawah!`,
         period: slot.period,
         placeName: p.name,
         activity: p.description.slice(0, 110) + '...',
-        estimatedCost: p.estimatedCost || 15000
+        estimatedCost: hargaDiketahui(p) ? (p.estimatedCost || 15000) : 0
       };
     }),
     tips: [
