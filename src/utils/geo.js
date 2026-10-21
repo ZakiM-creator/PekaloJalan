@@ -108,13 +108,13 @@ const urutTerdekat = (awal, items, akhir) => {
 
 /**
  * Urutkan tempat agar rute tidak bolak-balik. Posisi tempat kuliner dan tempat tanpa
- * koordinat DIKUNCI (jadwal makan tidak bergeser). Tempat lain di antara dua kunci disusun
+ * koordinat DIKUNCI (jadwal makan dan jam menginap tidak bergeser). Tempat lain di antara dua kunci disusun
  * ulang agar jalur terpendek. Segmen sampai 7 tempat dicari optimal, lebih dari itu pakai terdekat.
  * @param {Array} places daftar tempat sesuai urutan awal
  * @param {{lat:number,lng:number}|null} start posisi awal (opsional)
  */
 export const optimizeRoute = (places, start = null) => {
-  const items = places.map((p) => ({ p, c: getCoords(p), kunci: adalahKuliner(p) || !getCoords(p) }));
+  const items = places.map((p) => ({ p, c: getCoords(p), kunci: adalahKuliner(p) || p?.category === 'penginapan' || !getCoords(p) }));
   const hasil = [];
   let i = 0;
   let prev = start;

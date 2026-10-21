@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CategoryChips } from '../components/CategoryChips';
 import { PlaceCard } from '../components/PlaceCard';
-import { Search, LayoutGrid, ListFilter, SlidersHorizontal, Compass, X, MapPin, Navigation } from 'lucide-react';
+import { Search, SlidersHorizontal, Compass, X, MapPin, Navigation } from 'lucide-react';
 import { getKecamatan, getKelurahan, getCoords, haversineKm } from '../utils/geo.js';
 
 export const DirectoryPage = () => {
   const { filteredPlaces, searchQuery, setSearchQuery, selectedCategory, setSelectedCategory, categories } = useApp();
   const [sortBy, setSortBy] = useState('rating'); // 'rating' | 'name' | 'price-asc' | 'price-desc'
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [kecamatan, setKecamatan] = useState('');
   const [kelurahan, setKelurahan] = useState('');
   const [posisi, setPosisi] = useState(null); // { lat, lng } posisi pengguna
@@ -169,7 +168,7 @@ export const DirectoryPage = () => {
           )}
         </div>
 
-        {/* Sort & View Mode Toolbar */}
+        {/* Sort Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200 text-xs">
           
           <div className="text-slate-500">
@@ -194,27 +193,6 @@ export const DirectoryPage = () => {
               </select>
             </div>
 
-            {/* View Switcher */}
-            <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'grid' ? 'bg-slate-900 text-white font-bold' : 'text-slate-500 hover:text-slate-900'
-                }`}
-                title="Tampilan Grid"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'list' ? 'bg-slate-900 text-white font-bold' : 'text-slate-500 hover:text-slate-900'
-                }`}
-                title="Tampilan Daftar"
-              >
-                <ListFilter className="w-4 h-4" />
-              </button>
-            </div>
           </div>
 
         </div>
@@ -223,7 +201,7 @@ export const DirectoryPage = () => {
 
       {/* Places Display Container */}
       {sortedPlaces.length > 0 ? (
-        <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedPlaces.map((place) => (
             <PlaceCard key={place.id} place={place} jarakKm={sortBy === 'nearest' ? jarakKe(place) : null} />
           ))}

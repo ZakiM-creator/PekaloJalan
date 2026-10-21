@@ -57,10 +57,12 @@ export const kumpulkanKandidat = (chatMessages, places, bookmarkIds = []) => {
   const hasil = [];
   const ada = new Set();
   let idTerbaru = null;
-  const tambah = (place, sumber, time) => {
+  const tambah = (place, sumber, time, hari) => {
     if (!place || ada.has(place.id)) return;
     ada.add(place.id);
-    hasil.push({ place, sumber, time: time || '', dipilih: sumber === 'terbaru', hari: 1 });
+    // Hari dari rencana AI ikut terbawa (1 sampai 7, sesuai pilihan di form)
+    const h = Math.min(7, Math.max(1, Math.floor(Number(hari) || 1)));
+    hasil.push({ place, sumber, time: time || '', dipilih: sumber === 'terbaru', hari: h });
   };
   const daftar = [...(chatMessages || [])].reverse();
   daftar.forEach((m) => {
@@ -69,7 +71,7 @@ export const kumpulkanKandidat = (chatMessages, places, bookmarkIds = []) => {
     const sumber = m.id === idTerbaru ? 'terbaru' : 'sebelumnya';
     m.itinerary.schedule.forEach((s) => {
       const place = (s.placeId && places.find((p) => p.id === s.placeId)) || cariTempatDariNama(s.placeName, places);
-      tambah(place, sumber, s.time);
+      tambah(place, sumber, s.time, s.day);
     });
   });
   (bookmarkIds || []).forEach((id) => tambah(places.find((p) => p.id === id), 'tersimpan', ''));

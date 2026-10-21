@@ -262,6 +262,45 @@ export const removeManager = async (email) => {
 
 const MAX_DATA_URL_LENGTH = 700000; // batas aman agar dokumen Firestore (maks 1 MB) tidak gagal
 
+// Perkecil gambar di browser sebelum diunggah (maks sisi terpanjang 1200 px, JPEG kualitas 80%).
+// Jika gagal diperkecil, file asli tetap dipakai agar unggahan tidak terhenti.
+export const compressImage = (file, maxSide = 1200, quality = 0.8) =>
+  new Promise((resolve) => {
+    if (!file || !file.type || !file.type.startsWith('image/') || file.type === 'image/gif' || file.type === 'image/svg+xml') {
+      resolve(file);
+      return;
+    }
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff'; // latar putih untuk PNG transparan
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(objectUrl);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob || blob.size >= file.size) {
+            resolve(file); // hasil tidak lebih kecil, pakai file asli
+            return;
+          }
+          resolve(new File([blob], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }));
+        },
+        'image/jpeg',
+        quality
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(file);
+    };
+    img.src = objectUrl;
+  });
+
 export const uploadImageFile = async (file) => {
   if (!file) throw new Error('File gambar tidak ditemukan.');
 

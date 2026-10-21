@@ -220,7 +220,7 @@ export const AdminPage = () => {
               <tr>
                 <th className="py-3 px-4">Gambar</th>
                 <th className="py-3 px-4">Nama & Lokasi</th>
-                <th className="py-3 px-4">Kategori</th>
+                <th className="py-3 px-4 whitespace-nowrap">Kategori</th>
                 <th className="py-3 px-4">Pengelola</th>
                 <th className="py-3 px-4">Harga Est.</th>
                 <th className="py-3 px-4">Rating</th>
@@ -240,7 +240,7 @@ export const AdminPage = () => {
                       <p className="text-xs text-slate-500 truncate max-w-xs">{place.address}</p>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-100">
+                      <span className="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-100">
                         {categoryObj ? categoryObj.name : place.category}
                       </span>
                     </td>

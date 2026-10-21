@@ -9,6 +9,14 @@ export const ItineraryCard = ({ itinerary, onReviseClick, onTripPlan }) => {
     window.print();
   };
 
+  // Rencana multi-hari: item dikelompokkan per hari (field day), tiap hari diberi judul sendiri
+  const jadwal = Array.isArray(itinerary.schedule) ? itinerary.schedule : [];
+  const hariItem = (item) => Number(item && item.day) || 1;
+  const totalHari = new Set(jadwal.map(hariItem)).size;
+  const multiHari = totalHari > 1;
+  const biayaHari = (hari) =>
+    jadwal.filter((s) => hariItem(s) === hari).reduce((t, s) => t + (Number(s.estimatedCost) || 0), 0);
+
   return (
     <div className="mt-3 p-4 sm:p-5 rounded-2xl bg-white/90 border border-indigo-100 shadow-xl space-y-4 text-slate-800 font-sans">
       
@@ -24,6 +32,9 @@ export const ItineraryCard = ({ itinerary, onReviseClick, onTripPlan }) => {
           <h4 className="text-base sm:text-lg font-bold font-serif text-slate-900">
             {itinerary.title || 'Rencana Perjalanan Kota Pekalongan'}
           </h4>
+          {itinerary.duration && (
+            <p className="text-xs text-slate-500">Durasi: {itinerary.duration}</p>
+          )}
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -60,8 +71,19 @@ export const ItineraryCard = ({ itinerary, onReviseClick, onTripPlan }) => {
         </h5>
 
         <div className="relative pl-4 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-indigo-200">
-          {itinerary.schedule && itinerary.schedule.map((item, index) => (
-            <div key={index} className="relative flex items-start gap-3 group">
+          {jadwal.map((item, index) => (
+            <React.Fragment key={index}>
+            {multiHari && (index === 0 || hariItem(jadwal[index - 1]) !== hariItem(item)) && (
+              <div className="flex items-center justify-between gap-2 pt-1 text-xs font-extrabold uppercase tracking-wider text-indigo-800">
+                <span>Hari {hariItem(item)}</span>
+                {biayaHari(hariItem(item)) > 0 && (
+                  <span className="text-[11px] font-semibold normal-case text-emerald-700">
+                    ~ Rp {biayaHari(hariItem(item)).toLocaleString('id-ID')} / orang
+                  </span>
+                )}
+              </div>
+            )}
+            <div className="relative flex items-start gap-3 group">
               {/* Dot */}
               <div className="absolute -left-4 top-1 w-4 h-4 rounded-full bg-white border-2 border-slate-900 flex items-center justify-center text-[9px] font-bold text-indigo-800">
                 {index + 1}
@@ -112,6 +134,7 @@ export const ItineraryCard = ({ itinerary, onReviseClick, onTripPlan }) => {
                 )}
               </div>
             </div>
+            </React.Fragment>
           ))}
         </div>
       </div>

@@ -69,12 +69,13 @@ export const AITripPlannerPage = () => {
     setIsTyping(true);
 
     try {
-      // Build history for Gemini
-      const historyFormatted = updatedMessages
+      // Riwayat = pesan SEBELUM pesan sekarang (pesan sekarang dikirim terpisah, jangan dobel).
+      // Itinerary ikut dikirim supaya AI ingat isi rencana sebelumnya saat pengguna minta revisi.
+      const historyFormatted = chatMessages
         .filter(m => m.id !== 'welcome-1')
-        .map(m => ({ role: m.role, text: m.text }));
+        .map(m => ({ role: m.role, text: m.text, itinerary: m.itinerary || null }));
 
-      // Send to Gemini API / Smart Local Fallback
+      // Send to AI / penyusun rencana lokal
       const response = await sendMessageToGemini(historyFormatted, promptToSend.trim(), places);
 
       const aiMessageObj = {
@@ -120,7 +121,8 @@ export const AITripPlannerPage = () => {
     'Rencana 1 Hari Kuliner Megono & Belanja Batik (Budget 150rb)',
     'Wisata Religi Masjid Agung & Sunset Pantai Pasir Kencana',
     'Backpacker Hemat 1 Hari Wisata & Soto Tauto',
-    'Liburan Santai Keluarga 2 Hari di Pekalongan'
+    'Liburan Santai Keluarga 2 Hari di Pekalongan',
+    '3 hari budget 1 juta, mau ke Museum Batik dan Pantai Slamaran Indah'
   ];
 
   return (
@@ -308,7 +310,7 @@ export const AITripPlannerPage = () => {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Tuliskan keinginan liburan Anda (mis. '1 hari di Pekalongan, budget 200rb, suka soto tauto')..."
+              placeholder="Tuliskan keinginan Anda (mis. '2 hari, budget 500rb, mau ke Museum Batik, suka soto tauto')..."
               className="flex-1 px-4 py-3 sm:py-3.5 rounded-2xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-slate-400"
               disabled={isTyping}
             />

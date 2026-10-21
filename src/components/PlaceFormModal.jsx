@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Image as ImageIcon, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
-import { uploadImageFile, explainFirebaseError } from '../services/firebaseService';
+import { uploadImageFile, compressImage, explainFirebaseError } from '../services/firebaseService';
 import { generatePlaceDescription } from '../services/geminiService';
 
 const DEFAULT_FORM = {
@@ -74,9 +74,24 @@ export const PlaceFormModal = ({
     }
     setIsGeneratingDesc(true);
     try {
-      const desc = await generatePlaceDescription(formData.name, formData.category, formData.address);
-      setField('description', desc);
-      setStatus({ type: 'success', message: 'Deskripsi naratif khas Pekalongan berhasil dibuat oleh AI.' });
+      const kategori = categories.find((c) => c.id === formData.category);
+      const hasil = await generatePlaceDescription({
+        name: formData.name.trim(),
+        category: formData.category,
+        categoryLabel: kategori?.name,
+        address: formData.address,
+        openingHours: formData.openingHours,
+        priceRange: formData.priceRange,
+        facilities: formData.facilitiesStr.split(',').map((s) => s.trim()).filter(Boolean),
+        tags: formData.tagsStr.split(',').map((s) => s.trim()).filter(Boolean)
+      });
+      setField('description', hasil.text);
+      setStatus({
+        type: 'success',
+        message: hasil.sumber.length
+          ? `Deskripsi dibuat AI dan diverifikasi dari ${hasil.sumber.length} sumber web. Periksa kembali sebelum menyimpan.`
+          : 'Deskripsi dibuat AI dari data formulir (tanpa hasil pencarian web). Periksa kembali sebelum menyimpan.'
+      });
     } catch (err) {
       console.warn('AI error:', err);
       setStatus({ type: 'error', message: 'Deskripsi AI gagal dibuat. Tulis deskripsi secara manual.' });
@@ -90,7 +105,8 @@ export const PlaceFormModal = ({
     if (!file) return;
     setUploadingImage(true);
     try {
-      const url = await uploadImageFile(file);
+      const fileKecil = await compressImage(file);
+      const url = await uploadImageFile(fileKecil);
       setField('image', url);
     } catch (err) {
       setStatus({ type: 'error', message: err.message || 'Gagal mengunggah gambar.' });
